@@ -1,0 +1,70 @@
+.nav {
+  padding-block: 0.8rem;
+  width: 1535px;
+  border-block-end: 1px solid lightgray;
+  background-color: var(--sec-clr);
+}
+
+.logo-container img {
+  width: 30px;
+  background-color: rgba(255, 182, 193, 0.346);
+  transform: rotate(-3deg);
+  border-radius: 0.3rem;
+}
+
+.logo-container p {
+  font-weight: 800;
+}
+
+.searchbar-container {
+  position: relative;
+}
+
+.searchbar {
+  height: 40px;
+  line-height: 40px;
+  background-color: rgba(211, 211, 211, 0.3);
+  border-radius: 0.5rem;
+  border: 1px solid lightslategrey;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px,
+    rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+  width: 550px;
+  padding-inline-start: 2rem;
+}
+
+.searchbar::placeholder {
+  font-size: 0.8rem;
+}
+
+.searchbar-container img {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  width: 15px;
+  height: 15px;
+}
+
+.nav-icons-container img {
+  width: 20px;
+  height: 20px;
+}
+
+.cart-icon-container {
+  position: relative;
+}
+
+.cart-number {
+  position: absolute;
+  top: -5px;
+  right: -4px;
+  display: grid;
+  place-items: center;
+  padding: 0.05rem 0.25rem;
+  font-size: 0.7rem;
+  background-color: var(--main-clr);
+  border-radius: 50%;
+  color: var(--sec-clr);
+  font-weight: 800;
+  line-height: 1.1;
+}

@@ -1,0 +1,29 @@
+.strip {
+  margin-block-start: 2rem;
+  background-color: white;
+}
+
+.strip .container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15rem;
+  padding-block: 1rem;
+}
+
+.strip-item {
+  background-color: rgba(211, 211, 211, 0.8);
+  padding: 0.5rem 2rem;
+  border-radius: 0.8rem;
+}
+
+.img-holder {
+  padding: 0.8rem;
+  border-radius: 50%;
+  background-color: #d44e8849;
+}
+
+.img-holder img {
+  width: 20px;
+  height: 20px;
+}

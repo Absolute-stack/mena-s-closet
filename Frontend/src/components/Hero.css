@@ -1,0 +1,116 @@
+.hero {
+  margin-block-start: 2rem;
+}
+
+.hero-img-container {
+  position: relative;
+  height: 600px;
+  overflow: hidden;
+  border-radius: 1rem;
+}
+
+.hero-tag {
+  padding: 0.3rem 0.6rem;
+  background-color: #d4744e25;
+  width: max-content;
+  margin-inline: auto;
+  border-radius: 200px;
+  color: rgba(255, 255, 105, 0.489);
+  text-shadow: 0.5px 0.5px 0.5px rgba(255, 255, 105, 0.489);
+  backdrop-filter: 25px;
+  box-shadow: rgba(9, 30, 66, 0.25) 0px 4px 8px -2px,
+    rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;
+}
+
+.hero-img-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 1),
+    rgba(0, 0, 0, 0.2)
+  );
+}
+
+.hero-img-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: inherit;
+}
+
+.hero-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  line-height: 1.65;
+  text-align: center;
+  color: var(--accent-clr);
+}
+
+.hero-title {
+  font-size: 5rem;
+  line-height: 1;
+}
+
+.hero-subtitle {
+  margin-block-start: 0.5rem;
+  font-size: 1.3rem;
+  font-weight: 500;
+}
+
+.btn-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+  margin-block-start: 1rem;
+}
+
+.hero-main-btn {
+  background-color: var(--main-clr);
+  padding: 0.5rem 2rem;
+  color: var(--accent-clr);
+  border-radius: 0.4rem;
+  font-weight: 500;
+  box-shadow: rgba(9, 30, 66, 0.25) 0px 4px 8px -2px,
+    rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;
+  transition: 0.4s ease;
+}
+
+.hero-main-btn img {
+  filter: invert(100%);
+}
+
+.hero-main-btn:where(:hover, :focus-visible) {
+  -webkit-box-shadow: 0px 0px 5px 0px rgba(212, 116, 78, 0.69);
+  -moz-box-shadow: 0px 0px 5px 0px rgba(212, 116, 78, 0.69);
+  box-shadow: 0px 0px 5px 0px rgba(212, 116, 78, 0.69);
+  transform: translateY(-2px);
+}
+
+.hero-sec-btn {
+  background-color: rgba(255, 255, 255, 0.053);
+  backdrop-filter: 14px;
+  box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px,
+    rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;
+  padding: 0.5rem 2rem;
+  border-radius: 0.4rem;
+  color: var(--accent-clr);
+  font-weight: 500;
+  transition: 0.4s ease;
+}
+
+.hero-sec-btn img {
+  filter: invert(100%);
+}
+
+.hero-sec-btn:where(:hover, :focus-visible) {
+  -webkit-box-shadow: 0px 0px 5px 0px rgba(255, 255, 255, 0.69);
+  -moz-box-shadow: 0px 0px 5px 0px rgba(255, 255, 255, 0.69);
+  box-shadow: 0px 0px 5px 0px rgba(255, 255, 255, 0.69);
+  transform: translateY(-2px);
+}
