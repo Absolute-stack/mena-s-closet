@@ -1,0 +1,45 @@
+.newarrivals .container {
+  margin-block: 4rem;
+  background-color: var(--sec-clr);
+  padding: 1rem;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.newarrivals-grid {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  align-items: center;
+  margin-block-start: 4rem;
+  gap: 2rem;
+}
+
+.info-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.info-subtitle {
+  font-size: 0.9rem;
+  color: lightslategrey;
+}
+
+.card-grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.card-grid-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 1rem;
+  transition: 0.4s ease-out;
+}
+
+.card-grid-container img:where(:hover, :focus-visible) {
+  transform: scale(1.05);
+  border-radius: 1rem;
+}

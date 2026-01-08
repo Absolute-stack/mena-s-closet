@@ -26,22 +26,12 @@ function Hero() {
           </p>
           <div className="btn-container">
             <button type="button" className="hero-main-btn flex gap">
-              Shop New Arrivals
-              <img
-                src={assests.right_arrow}
-                alt="right_arrow"
-                loading="eager"
-                fetchPriority="high"
-              />
+              Shop Women
+              <img src={assests.right_arrow} alt="right_arrow" />
             </button>
             <button type="button" className="hero-sec-btn flex gap">
               How it Works
-              <img
-                src={assests.clock_icon}
-                alt="clock_icon"
-                loading="eager"
-                fetchPriority="high"
-              />
+              <img src={assests.clock_icon} alt="clock_icon" />
             </button>
           </div>
         </div>

@@ -1,0 +1,113 @@
+.filterbar {
+  margin-block: 3rem;
+}
+
+.lines-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.lines-container .line {
+  display: flex;
+  background: black;
+}
+
+.sort,
+.filter-btn {
+  background-color: var(--sec-clr);
+  border: 1px solid lightslategray;
+  padding: 0.5rem 2rem;
+  border-radius: 200px;
+  transition: 0.2s ease;
+}
+
+.sort {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  /* Custom inverted arrow */
+  background-image: url("data:image/svg+xml;utf8,\
+  <svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'>\
+    <path d='M1 1l5 5 5-5' stroke='%23666' stroke-width='2' fill='none' stroke-linecap='round'/>\
+  </svg>");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 12px 8px;
+}
+
+.filter-btn:where(:hover) {
+  outline: 2px solid black;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+}
+
+.sort:where(:hover) {
+  border: 2px solid black;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+}
+
+.right-side {
+  font-size: 0.9rem;
+  color: lightslategray;
+}
+
+.filter-dropdown {
+  margin-block-start: 1.5rem;
+  padding: 2rem;
+  background-color: var(--sec-clr);
+  border-radius: 1rem;
+}
+.cat-section {
+  margin-block: 2rem;
+}
+
+.filter-btns-container {
+  margin-block-start: 1rem;
+}
+
+.filter-btns-container button {
+  padding: 0.4rem 2rem;
+  border-radius: 200px;
+  transition: 0.3s ease;
+}
+
+.filter-btns-container button:where(:hover, :focus-visible) {
+  background-color: rgba(69, 74, 79, 0.205);
+  transform: translateY(-2px);
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+}
+
+/* product card */
+
+.women-page .product-item,
+.men-page .product-item,
+.acc-page .product-item {
+  display: grid;
+  border-radius: 1rem;
+  background-color: rgb(244, 243, 243);
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  overflow: hidden;
+}
+
+.women-page .product-item img,
+.men-page .product-item img,
+.acc-page .product-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: 0.3s ease-out;
+}
+
+.women-page .product-item img:where(:hover, :focus-visible),
+.men-page .product-item img:where(:hover, :focus-visible),
+.acc-page .product-item img:where(:hover, :focus-visible) {
+  transform: scale(1.05);
+}
+
+.women-page .product-info-container,
+.men-page .product-info-container,
+.acc-page .product-info-container {
+  padding: 0.5rem;
+}

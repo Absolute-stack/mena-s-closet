@@ -22,6 +22,65 @@
       href="./src/assets/images/logo.webp"
       type="image/x-icon"
     />
+
+    <!-- Critical Css Styles -->
+    <style>
+      /* inter-regular - latin */
+      @font-face {
+        font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+        font-family: 'Inter';
+        font-style: normal;
+        font-weight: 400;
+        src: url('./src/assets/fonts/inter-v20-latin-regular.woff2')
+          format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+      }
+      /* inter-500 - latin */
+      @font-face {
+        font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+        font-family: 'Inter';
+        font-style: normal;
+        font-weight: 500;
+        src: url('./src/assets/fonts/inter-v20-latin-500.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+      }
+      /* inter-700 - latin */
+      @font-face {
+        font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+        font-family: 'Inter';
+        font-style: normal;
+        font-weight: 700;
+        src: url('./src/assets/fonts/inter-v20-latin-700.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+      }
+
+      :root {
+        --main-clr: #d4744e;
+        --sec-clr: #ffffff;
+        --accent-clr: lightgrey;
+        --tag-clr: rgba(255, 255, 105, 0.489);
+        --tag-clr2: rgba(255, 255, 105);
+
+        --bg-clr: rgb(234, 234, 234);
+        --main-ff: 'Inter', sans-serif;
+      }
+
+      *,
+      *::after,
+      *::before {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      .hero {
+        margin-block-start: 2rem;
+      }
+
+      .nav {
+        padding-block: 0.8rem;
+        width: 1535px;
+        border-block-end: 1px solid lightgray;
+        background-color: var(--sec-clr);
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
