@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { assests } from '../assets/assets';
 import './Hero.css';
 
@@ -8,10 +9,11 @@ function Hero() {
         <div className="hero-img-container">
           <img
             className="hero-img"
-            src={assests.hero}
+            src={'/hero.avif'}
             alt="female black model posing in-front of camera"
             loading="eager"
             fetchPriority="high"
+            decoding="async"
           />
         </div>
         <div className="hero-content">
@@ -25,10 +27,12 @@ function Hero() {
             Shop with Confidence - Easy Returns, Secure Payment, Fast Delivery
           </p>
           <div className="btn-container">
-            <button type="button" className="hero-main-btn flex gap">
-              Shop Women
-              <img src={assests.right_arrow} alt="right_arrow" />
-            </button>
+            <Link to="/women">
+              <button type="button" className="hero-main-btn flex gap">
+                Shop Women
+                <img src={assests.right_arrow} alt="right_arrow" />
+              </button>
+            </Link>
             <button type="button" className="hero-sec-btn flex gap">
               How it Works
               <img src={assests.clock_icon} alt="clock_icon" />

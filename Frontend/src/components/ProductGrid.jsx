@@ -3,7 +3,10 @@ import Productitem from './Productitem';
 import './ProductGrid.css';
 
 function ProductGrid({ products }) {
-  const ITEMS_PER_LOAD = 10;
+  if (!Array.isArray(products)) {
+    throw new Error('products must be an array');
+  }
+  const ITEMS_PER_LOAD = 9;
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_LOAD);
 
   useEffect(() => {
@@ -15,7 +18,7 @@ function ProductGrid({ products }) {
   }, [products, visibleCount]);
 
   function loadMore() {
-    setVisibleCount((prevCount) => prevCount + 5);
+    setVisibleCount((prevCount) => prevCount + 3);
   }
 
   if (!products || products.length === 0) {
@@ -35,14 +38,14 @@ function ProductGrid({ products }) {
             alt={product.alt}
           />
         ))}
-        {visibleCount < products.length && (
-          <div className="load-more-container">
-            <button type="button" className="load-more-btn" onClick={loadMore}>
-              Load More
-            </button>
-          </div>
-        )}
       </div>
+      {visibleCount < products.length && (
+        <div className="load-more-container">
+          <button type="button" className="load-more-btn" onClick={loadMore}>
+            Load More
+          </button>
+        </div>
+      )}
     </section>
   );
 }

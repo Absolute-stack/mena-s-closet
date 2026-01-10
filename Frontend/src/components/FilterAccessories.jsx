@@ -3,17 +3,18 @@ import { ShopContext } from './ShopContext';
 import './Filter.css';
 
 function FilterAccessories() {
-  const { menProducts, sort, setSort } = useContext(ShopContext);
+  const { accessoryProductsFull, accessoryProducts, sort, setSort } =
+    useContext(ShopContext);
   const [showFilter, setShowFilters] = useState(false);
 
   // Memoize unique sizes and categories
   const allSizes = useMemo(() => {
-    return [...new Set(menProducts.flatMap((p) => p.sizes || []))];
-  }, [menProducts]);
+    return [...new Set(accessoryProductsFull.flatMap((p) => p.sizes || []))];
+  }, [accessoryProducts]);
 
   const allCategories = useMemo(() => {
-    return [...new Set(menProducts.map((p) => p.category))];
-  }, [menProducts]);
+    return [...new Set(accessoryProductsFull.map((p) => p.category))];
+  }, [accessoryProducts]);
 
   function handleClick() {
     setShowFilters((prevValue) => !prevValue);
@@ -47,7 +48,8 @@ function FilterAccessories() {
             </select>
           </div>
           <div className="right-side">
-            Showing {menProducts.length} out of {menProducts.length} Products
+            Showing {accessoryProducts.length} out of {accessoryProducts.length}{' '}
+            Products
           </div>
         </div>
         {showFilter && (

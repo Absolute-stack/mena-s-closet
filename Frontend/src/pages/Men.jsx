@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import PageNav from '../components/PageNav';
 import HeroImage from '../components/HeroImage';
-import FilterWomen from '../components/FilterWomen';
+import FilterMen from '../components/FilterMen';
 import ProductGrid from '../components/ProductGrid';
 import { ShopContext } from '../components/ShopContext';
 
@@ -18,7 +18,7 @@ function Women() {
           title="Discover Your Style: Men's Fashion"
           subtitle="Elevate your wardrobe with our curated collection."
         />
-        <FilterWomen />
+        <FilterMen />
         <ProductGrid products={menProducts} />
       </div>
     </main>

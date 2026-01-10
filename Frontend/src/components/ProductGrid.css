@@ -14,3 +14,19 @@
   box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
     rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
 }
+
+.load-more-container {
+  display: flex;
+  justify-content: center;
+  margin-block-start: 2rem;
+}
+
+.load-more-btn {
+  background-color: var(--sec-clr);
+  color: black;
+  font-weight: 500;
+  padding: 0.5rem 2rem;
+  border-radius: 0.3rem;
+  box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em,
+    rgba(90, 125, 188, 0.05) 0px 0.25em 1em;
+}

@@ -5,6 +5,8 @@ export const ShopContext = createContext();
 
 function ShopContextProvider({ children }) {
   const [sort, setSort] = useState('default');
+  const [categories, setCategories] = useState([]);
+  const [sizes, setSizes] = useState([]);
 
   // base filtered data (never mutated)
   const products = useMemo(() => {
@@ -13,50 +15,82 @@ function ShopContextProvider({ children }) {
 
   const womenProducts = useMemo(() => {
     return allProducts.filter(
-      (product) => product.gender === 'female' && !product.accessories
+      (product) => product.gender === 'women' && !product.accessories
     );
   }, []);
 
   const menProducts = useMemo(() => {
     return allProducts.filter(
-      (product) => product.gender === 'male' && !product.accessories
+      (product) => product.gender === 'men' && !product.accessories
     );
   }, []);
 
   const accessoryProducts = useMemo(() => {
     return allProducts.filter((product) => product.accessories);
-  });
+  }, []);
+
+  const relatedProducts = useMemo(() => {}, []);
 
   // sorted version (derived safely)
   const sortedWomenProducts = useMemo(() => {
-    const products = [...womenProducts]; // copy first
+    let filtered = [...womenProducts];
 
+    // CATEGORY FILTER
+    if (categories.length > 0) {
+      filtered = filtered.filter((p) => categories.includes(p.category));
+    }
+
+    // SIZE FILTER
+    if (sizes.length > 0) {
+      filtered = filtered.filter((p) =>
+        p.sizes?.some((s) => sizes.includes(s))
+      );
+    }
+
+    // SORT
     switch (sort) {
       case 'Low-High':
-        return products.sort((a, b) => a.price - b.price);
+        filtered.sort((a, b) => a.price - b.price);
+        break;
 
       case 'High-Low':
-        return products.sort((a, b) => b.price - a.price);
+        filtered.sort((a, b) => b.price - a.price);
+        break;
 
       default:
-        return products;
+        break;
     }
-  }, [sort, womenProducts]);
+
+    return filtered;
+  }, [sort, womenProducts, categories, sizes]);
 
   const sortedMenProducts = useMemo(() => {
-    const products = [...menProducts]; // copy first
+    const filtered = [...menProducts]; // copy first
+
+    if (categories.length > 0) {
+      filtered = filtered.filter((p) => categories.includes(p.category));
+    }
+
+    if (sizes.length > 0) {
+      filtered = filtered.filter((p) =>
+        p.sizes?.some((s) => sizes.includes(s))
+      );
+    }
 
     switch (sort) {
       case 'Low-High':
-        return products.sort((a, b) => a.price - b.price);
-
+        filtered.sort((a, b) => a.price - b.price);
+        break;
       case 'High-Low':
-        return products.sort((a, b) => b.price - a.price);
-
+        filtered.sort((a, b) => b.price - a.price);
+        break;
       default:
-        return products;
+        filtered;
+        break;
     }
-  }, [sort, menProducts]);
+
+    return filtered;
+  }, [sort, menProducts, categories, sizes]);
 
   const sortedAccessories = useMemo(() => {
     const products = [...accessoryProducts];
@@ -64,10 +98,8 @@ function ShopContextProvider({ children }) {
     switch (sort) {
       case 'Low-High':
         return products.sort((a, b) => a.price - b.price);
-        break;
       case 'High-Low':
         return products.sort((a, b) => b.price - a.price);
-        break;
       default:
         return products;
     }
@@ -76,8 +108,15 @@ function ShopContextProvider({ children }) {
   const value = {
     sort,
     setSort,
-    womenProducts: sortedWomenProducts,
+    categories,
+    setCategories,
+    sizes,
+    setSizes,
+    womenProductsFull: womenProducts, // full unfiltered
+    womenProducts: sortedWomenProducts, // filtered for display
+    menProductsFull: menProducts,
     menProducts: sortedMenProducts,
+    accessoryProductsFull: accessoryProducts,
     accessoryProducts: sortedAccessories,
     products,
     currency: 'GH₵',

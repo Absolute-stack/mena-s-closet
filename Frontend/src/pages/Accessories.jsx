@@ -2,8 +2,8 @@ import { useContext } from 'react';
 import PageNav from '../components/PageNav';
 import HeroImage from '../components/HeroImage';
 import ProductGrid from '../components/ProductGrid';
-import { ShopContext } from '../components/ShopContext';
 import FilterAccessories from '../components/FilterAccessories';
+import { ShopContext } from '../components/ShopContext';
 
 function Accessories() {
   const { accessoryProducts } = useContext(ShopContext);
