@@ -1,18 +1,22 @@
 /* ===============================
-   ROOT VARIABLES
-================================ */
-:root {
-  --main-clr: #d4744e;
-  --sec-clr: #ffffff;
-}
-
-/* ===============================
-   NAVBAR
+   NAVBAR - DESKTOP
 ================================ */
 .nav {
   position: relative;
   z-index: 100;
   background: white;
+  width: 100%;
+}
+
+.nav .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 /* ===============================
@@ -22,6 +26,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-shrink: 0;
 }
 
 .logo-container img {
@@ -41,7 +46,9 @@
 ================================ */
 .searchbar-container {
   position: relative;
-  width: 550px;
+  width: 100%;
+  max-width: 550px;
+  flex: 1;
 }
 
 .searchbar {
@@ -52,15 +59,12 @@
   border-radius: 0.5rem;
   border: 1px solid lightslategrey;
   outline: none;
-  box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px,
-    rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
 }
 
 .searchbar::placeholder {
   font-size: 0.8rem;
 }
 
-/* SEARCH ICON */
 .searchbar-container > img {
   position: absolute;
   top: 50%;
@@ -76,15 +80,13 @@
 .search-dropdown {
   position: absolute;
   top: 110%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100vw;
+  left: 0;
+  width: 100%;
   background: white;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
   z-index: 999;
 }
 
-/* INNER GRID */
 .search-dropdown-inner {
   max-width: 1200px;
   margin: 0 auto;
@@ -112,22 +114,12 @@
   background: #f7f7f7;
 }
 
-/* IMAGE LOCK */
 .search-item img {
   width: 64px;
   height: 64px;
   min-width: 64px;
   object-fit: cover;
   border-radius: 0.5rem;
-  flex-shrink: 0;
-}
-
-/* TEXT */
-.search-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  overflow: hidden;
 }
 
 .search-name {
@@ -150,6 +142,7 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-shrink: 0;
 }
 
 .nav-icons-container img {
@@ -167,15 +160,88 @@
 
 .cart-number {
   position: absolute;
-  top: -5px;
-  right: -4px;
-  display: grid;
-  place-items: center;
-  padding: 0.05rem 0.35rem;
-  font-size: 0.7rem;
-  background-color: var(--main-clr);
+  top: -6px;
+  right: -8px;
+  min-width: 18px;
+  height: 18px;
+  background: var(--main-clr);
+  color: white;
   border-radius: 50%;
-  color: var(--sec-clr);
-  font-weight: 700;
-  line-height: 1.1;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+/* ===============================
+   PROFILE DROPDOWN
+================================ */
+.profile-container {
+  position: relative;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 5px);
+  width: 110px;
+  padding: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--sec-clr);
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.3s ease;
+}
+
+.profile-container:hover .profile-dropdown {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.profile-dropdown a {
+  display: block;
+  padding: 0.25rem 0;
+}
+
+/* ===============================
+   TABLET
+================================ */
+@media (max-width: 768px) {
+  .search-dropdown-inner {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    padding: 1rem;
+  }
+}
+
+/* ===============================
+   MOBILE
+================================ */
+@media (max-width: 480px) {
+  .nav .container {
+    flex-direction: column;
+    padding: 0.75rem 1rem;
+  }
+
+  .logo-container {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .searchbar-container {
+    max-width: 100%;
+  }
+
+  .nav-icons-container {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .search-dropdown-inner {
+    grid-template-columns: 1fr;
+    padding: 0.75rem;
+  }
 }

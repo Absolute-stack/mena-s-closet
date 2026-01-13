@@ -1,216 +1,427 @@
-.placeOrders-section .wrapper {
-  display: grid;
-  grid-template-columns: 1.8fr 1fr;
-  gap: 2rem;
+/* ===============================
+   PLACE ORDERS - MOBILE FIRST
+================================ */
+
+.placeOrders-section {
+  padding: 1rem;
 }
 
+.placeOrders-section .container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Breadcrumb Navigation */
 .place-order-page-nav {
-  font-size: 0.9rem;
-  color: lightslategray;
-  padding-block: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #888;
+  padding: 1rem 0;
+  margin-bottom: 1rem;
 }
 
 .place-order-page-nav .link {
+  color: #666;
+  text-decoration: none;
   position: relative;
+  transition: color 0.2s ease;
 }
 
-.place-order-page-nav .link::before {
+.place-order-page-nav .link::after {
   content: '';
   position: absolute;
-  top: calc(100% - 1px);
-  width: 0%;
+  bottom: -2px;
+  left: 0;
+  width: 0;
   height: 2px;
-  border-radius: 5px;
-  background: rgba(0, 0, 0, 0.425);
-  transition: 0.6s ease;
+  background-color: var(--main-clr);
+  transition: width 0.3s ease;
 }
 
-.place-order-page-nav .link:where(:hover, :focus-visible)::before {
+.place-order-page-nav .link:hover {
+  color: var(--main-clr);
+}
+
+.place-order-page-nav .link:hover::after {
   width: 100%;
 }
 
-.form-item-title p {
-  color: var(--main-clr);
-  font-size: 1.1rem;
-  font-weight: 700;
+.place-order-page-nav span {
+  color: #ccc;
+}
+
+/* Main Layout */
+.placeOrders-section .wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Form Container */
+.address-form {
+  width: 100%;
+}
+
+/* Form Section Titles */
+.form-item-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
 }
 
 .form-item-title img {
-  padding: 0.3rem;
-  border-radius: 0.3rem;
-  background-color: #d4744e64;
-}
-
-.personal-detail-input-wrapper .item p {
-  margin: 0;
-  padding: 0;
-  margin-block-end: 0.1rem;
-}
-
-.personal-wrapper {
-  margin-block-start: 1.8rem;
-  padding: 3rem;
-  border-radius: 1rem;
-  background-color: var(--sec-clr);
-  box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
-}
-
-.personal-wrapper input {
-  border: 1px solid lightslategray;
-  height: 40px;
-  line-height: 40px;
-  padding-inline-start: 1rem;
+  width: 28px;
+  height: 28px;
+  padding: 0.4rem;
   border-radius: 0.5rem;
+  background-color: rgba(212, 116, 78, 0.15);
 }
 
-.form-item-title {
-  margin-block-end: 1rem;
+.form-item-title p {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--main-clr);
+  margin: 0;
 }
 
+/* Form Wrappers */
+.personal-wrapper,
 .delivery-wrapper {
-  margin-block-start: 3rem;
-  padding: 3rem;
   background-color: var(--sec-clr);
-  box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+  padding: 1.5rem;
   border-radius: 1rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 2rem;
+}
+
+/* Input Grid */
+.personal-detail-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.personal-detail-input-wrapper .item {
+  width: 100%;
+}
+
+.personal-detail-input-wrapper .item p,
+.personal-detail-input-wrapper .item .label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+/* Inputs */
+.personal-detail-input-wrapper .item input,
+.personal-detail-input-wrapper .item .select,
+.sub-main input,
+.tertiary-section textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  background-color: white;
+}
+
+.personal-detail-input-wrapper .item input:focus,
+.personal-detail-input-wrapper .item .select:focus,
+.sub-main input:focus,
+.tertiary-section textarea:focus {
+  outline: none;
+  border-color: var(--main-clr);
+  box-shadow: 0 0 0 3px rgba(212, 116, 78, 0.1);
 }
 
 .personal-detail-input-wrapper .item .select {
-  padding: 0.5rem 3rem;
-  height: 40px;
-  border: 1px solid lightslategray;
-  border-radius: 0.5rem;
-  width: 100%;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='%23666' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 12px 8px;
+  padding-right: 3rem;
 }
 
-.personal-detail-input-wrapper .item input {
-  border: 1px solid lightslategray;
-  height: 38px;
-  border-radius: 0.5rem;
-  padding-inline-start: 1rem;
-  width: 100%;
-}
-
-.label {
-  display: flex;
-  flex-direction: column;
-}
-
+/* Landmark Section */
 .sub-main {
-  margin-block-start: 0.9rem;
+  margin-top: 1.5rem;
+}
+
+.landmark-title {
+  display: flex;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
 }
 
 .landmark-title span {
   color: var(--main-clr);
 }
 
-.sub-main input {
-  height: 40px;
-  line-height: 40px;
-  border-radius: 0.5rem;
-  padding-inline-start: 0.5rem;
-  border: 1px solid lightslategray;
-  width: 100%;
+.sub-main input::placeholder,
+.tertiary-section textarea::placeholder {
+  font-size: 0.85rem;
+  color: #999;
 }
 
-.sub-main input::placeholder {
-  font-size: 0.8rem;
-}
-
+/* Textarea */
 .tertiary-section {
-  margin-block-start: 1rem;
+  margin-top: 1.5rem;
 }
 
 .tertiary-section p {
-  margin-block: 0.3rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
 }
 
 .tertiary-section textarea {
-  min-width: 100%;
-  min-height: 100px;
-  padding-block-start: 0.5rem;
-  padding-inline-start: 1rem;
-  resize: none;
+  min-height: 120px;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.6;
 }
 
-.tertiary-section textarea::placeholder {
-  font-size: 0.9rem;
+/* ===============================
+   ORDER SUMMARY
+================================ */
+
+.order-map-section {
+  width: 100%;
 }
 
 .order-summary {
-  margin-block-start: 2rem;
-  background-color: #8b0f07d0;
-  padding-block: 2.7rem;
-  padding-inline: 2rem;
-  box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px,
-    rgba(14, 30, 37, 0.32) 0px 2px 16px 0px;
-  border-radius: 2rem;
+  background: linear-gradient(135deg, #8b0f07 0%, #a01510 100%);
+  padding: 2rem 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 8px 24px rgba(139, 15, 7, 0.3);
 }
 
 .order-title {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: gold;
+  margin-bottom: 1.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.order-subtotal {
-  display: flex;
-  justify-content: space-between;
-  color: white;
-  margin-block-start: 1rem;
-}
-
+.order-subtotal,
 .order-delivery {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   color: white;
-  margin-block: 1rem;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+.order-subtotal span,
+.order-delivery span {
+  font-weight: 600;
 }
 
 .total-amount {
-  font-size: 2rem;
-  margin-block: 0.5rem;
-  padding-block-start: 0.5rem;
   position: relative;
-  font-weight: 400;
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+  font-size: 1.2rem;
+  font-weight: 600;
   color: gold;
+  margin-bottom: 0.5rem;
 }
 
 .total-amount::before {
   content: '';
   position: absolute;
-  top: -1px;
-  height: 2px;
+  top: 0;
+  left: 0;
   width: 100%;
+  height: 2px;
   background: gold;
 }
 
 .total-number {
-  font-size: 2.2rem;
-  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 2rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 2rem;
   line-height: 1;
-  color: var(--sec-clr);
+}
+
+.total-number svg {
+  flex-shrink: 0;
 }
 
 .proceed-btn {
-  margin-inline: auto;
-  margin-block-start: 1rem;
-  padding: 0.5rem;
-  background-color: rgb(220, 187, 0);
-  color: #8b0f07d0;
-  border-radius: 0.3rem;
-  font-size: 1.1rem;
+  width: 100%;
+  padding: 1rem;
+  background-color: gold;
+  color: #8b0f07;
+  font-size: 1rem;
   font-weight: 700;
-  transition: 0.4s ease;
-  margin-block: 2rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 1.25rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: none;
 }
 
-.proceed-btn:where(:hover, :focus-visible) {
-  transform: translateY(-2px);
+.proceed-btn:hover {
+  background-color: #ffd700;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
 }
 
 .order-bottom {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   text-align: center;
-  color: var(--sec-clr);
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ===============================
+   TABLET (≥600px)
+================================ */
+@media (min-width: 600px) {
+  .placeOrders-section {
+    padding: 1.5rem;
+  }
+
+  .place-order-page-nav {
+    font-size: 0.9rem;
+    gap: 0.75rem;
+  }
+
+  .personal-wrapper,
+  .delivery-wrapper {
+    padding: 2rem;
+  }
+
+  .personal-detail-input-wrapper {
+    flex-direction: row;
+    gap: 1.5rem;
+  }
+
+  .personal-detail-input-wrapper .item {
+    flex: 1;
+  }
+
+  .form-item-title p {
+    font-size: 1.15rem;
+  }
+
+  .order-summary {
+    padding: 2.25rem 2rem;
+  }
+
+  .order-title {
+    font-size: 1.5rem;
+  }
+
+  .total-number {
+    font-size: 2.25rem;
+  }
+}
+
+/* ===============================
+   DESKTOP (≥1024px)
+================================ */
+@media (min-width: 1024px) {
+  .placeOrders-section {
+    padding: 2rem;
+  }
+
+  .placeOrders-section .wrapper {
+    flex-direction: row;
+    gap: 3rem;
+    align-items: flex-start;
+  }
+
+  .address-form {
+    flex: 1.8;
+  }
+
+  .order-map-section {
+    flex: 1;
+    position: sticky;
+    top: 2rem;
+  }
+
+  .personal-wrapper,
+  .delivery-wrapper {
+    padding: 2.5rem;
+  }
+
+  .form-item-title img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .form-item-title p {
+    font-size: 1.25rem;
+  }
+
+  .personal-detail-input-wrapper .item input,
+  .personal-detail-input-wrapper .item .select,
+  .sub-main input,
+  .tertiary-section textarea {
+    font-size: 1rem;
+  }
+
+  .order-summary {
+    padding: 2.5rem;
+  }
+
+  .order-title {
+    font-size: 1.6rem;
+  }
+
+  .order-subtotal,
+  .order-delivery {
+    font-size: 1rem;
+  }
+
+  .total-amount {
+    font-size: 1.3rem;
+  }
+
+  .total-number {
+    font-size: 2.5rem;
+  }
+
+  .proceed-btn {
+    font-size: 1.05rem;
+    padding: 1.15rem;
+  }
+}
+
+/* ===============================
+   LARGE DESKTOP (≥1400px)
+================================ */
+@media (min-width: 1400px) {
+  .placeOrders-section .wrapper {
+    gap: 4rem;
+  }
+
+  .order-map-section {
+    max-width: 450px;
+  }
 }

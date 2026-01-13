@@ -1,3 +1,9 @@
+/* ===============================
+   MOBILE RESPONSIVE STYLES
+   Mena's Closet Ghana
+================================ */
+
+/* Base styles remain the same */
 li {
   list-style: none;
 }
@@ -50,11 +56,13 @@ select {
   background: var(--main-clr);
 }
 
-/* Utility Classes */
-
+/* ===============================
+   UTILITY CLASSES
+================================ */
 .container {
   max-width: 85rem;
   margin-inline: auto;
+  padding-inline: 1rem;
 }
 
 .flex {
@@ -86,14 +94,13 @@ select {
 
 .skeleton-block {
   width: 100%;
-  height: 120px; /* adjust per use */
+  height: 120px;
   border-radius: 12px;
   background: linear-gradient(100deg, #e5e7eb 40%, #f3f4f6 50%, #e5e7eb 60%);
   background-size: 200% 100%;
   animation: skeleton-loading 1.4s ease-in-out infinite;
 }
 
-/* Shimmer animation */
 @keyframes skeleton-loading {
   0% {
     background-position: 200% 0;
@@ -103,6 +110,9 @@ select {
   }
 }
 
+/* ===============================
+   PAGE NAVIGATION
+================================ */
 .page-nav {
   padding-block: 1rem;
 }
@@ -148,8 +158,9 @@ select {
   width: 100%;
 }
 
-/* General Stying */
-
+/* ===============================
+   GENERAL STYLING
+================================ */
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
@@ -162,11 +173,12 @@ body {
   background-color: var(--bg-clr);
 }
 
-/* Shop by category */
-
+/* ===============================
+   SHOP BY CATEGORY
+================================ */
 .category-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   margin-block-start: 2rem;
   border-radius: 2rem;
@@ -174,7 +186,7 @@ body {
 
 .card {
   position: relative;
-  width: 450px;
+  width: 100%;
   height: 450px;
   border-radius: 2rem;
   transition: 0.25s ease-out;
@@ -213,7 +225,9 @@ body {
   z-index: 2;
 }
 
-/* title container */
+/* ===============================
+   TITLE CONTAINER
+================================ */
 .title-container {
   margin-block-start: 2rem;
 }
@@ -245,14 +259,16 @@ body {
   font-size: 1.5rem;
 }
 
-/* limited sales offer */
+/* ===============================
+   LIMITED SALES OFFER
+================================ */
 .limited-sale-offer {
-  width: 500px;
+  width: 100%;
+  max-width: 500px;
   height: 200px;
   margin-block-start: 2rem;
   background-image: linear-gradient(to right, #d4744e, #d4744e3c);
-  padding-block-start: 1rem;
-  padding-inline-start: 1rem;
+  padding: 1rem;
   color: var(--sec-clr);
   border-radius: 1rem;
   cursor: pointer;
@@ -261,11 +277,6 @@ body {
 
 .limited-sale-offer:where(:hover, :focus-visible) {
   transform: scale(1.05);
-}
-
-.limited-sale-offer img {
-  width: 100%;
-  height: 100%;
 }
 
 .limited-tag {
@@ -287,4 +298,148 @@ body {
   color: var(--sec-clr);
   text-decoration: underline;
   margin-block-start: 1rem;
+}
+
+/* ===============================
+   TABLET BREAKPOINT (768px)
+================================ */
+@media (max-width: 768px) {
+  .container {
+    padding-inline: 1rem;
+  }
+
+  /* Category Grid */
+  .category-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .card {
+    height: 350px;
+  }
+
+  .card-content {
+    left: 20px;
+    bottom: 20px;
+    font-size: 1.2rem;
+  }
+
+  /* Title Container */
+  .shop-subtitle {
+    font-size: 0.85rem;
+  }
+
+  /* Limited Offer */
+  .limited-sale-offer {
+    max-width: 100%;
+    height: 180px;
+  }
+
+  .sale-title {
+    font-size: 1.4rem;
+  }
+}
+
+/* ===============================
+   MOBILE BREAKPOINT (480px)
+================================ */
+@media (max-width: 480px) {
+  /* Typography adjustments */
+  .shop-title {
+    font-size: 1.3rem;
+  }
+
+  .shop-subtitle {
+    font-size: 0.8rem;
+  }
+
+  /* Category Cards */
+  .card {
+    height: 280px;
+    border-radius: 1rem;
+  }
+
+  .card img {
+    border-radius: 1rem;
+  }
+
+  .card::before {
+    border-radius: 1rem;
+  }
+
+  .card-content {
+    left: 15px;
+    bottom: 15px;
+    font-size: 1rem;
+  }
+
+  /* Limited Offer */
+  .limited-sale-offer {
+    height: 160px;
+    padding: 0.75rem;
+  }
+
+  .limited-tag {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .sale-title {
+    font-size: 1.1rem;
+    margin-block-start: 0.5rem;
+  }
+
+  .limited-sale-offer p {
+    font-size: 0.85rem;
+  }
+
+  .shop-details {
+    font-size: 0.85rem;
+    margin-block-start: 0.75rem;
+  }
+
+  /* Page Navigation */
+  .page-nav p {
+    font-size: 0.8rem;
+  }
+
+  /* Gap utilities for mobile */
+  .gap {
+    gap: 0.3rem;
+  }
+
+  .gap1 {
+    gap: 0.75rem;
+  }
+
+  .gap2 {
+    gap: 1.5rem;
+  }
+}
+
+/* ===============================
+   SMALL MOBILE (320px)
+================================ */
+@media (max-width: 375px) {
+  .container {
+    padding-inline: 0.75rem;
+  }
+
+  .card {
+    height: 240px;
+  }
+
+  .card-content {
+    font-size: 0.9rem;
+    left: 12px;
+    bottom: 12px;
+  }
+
+  .limited-sale-offer {
+    height: 140px;
+  }
+
+  .sale-title {
+    font-size: 1rem;
+  }
 }

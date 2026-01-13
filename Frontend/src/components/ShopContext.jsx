@@ -127,13 +127,25 @@ function ShopContextProvider({ children }) {
 
   function updateCart(size, itemId, quantity) {
     const cartData = structuredClone(cartItems);
-    quantity = cartData[itemId][size];
+
+    if (!cartData[itemId] || quantity < 0) return;
+
+    if (quantity === 0) {
+      // Remove this size
+      delete cartData[itemId][size];
+
+      // If no sizes left, remove the product
+      if (Object.keys(cartData[itemId]).length === 0) {
+        delete cartData[itemId];
+      }
+    } else {
+      cartData[itemId][size] = quantity; // ✅ update quantity
+    }
+
     setCartItems(cartData);
   }
 
-  function clearCart(size, itemId, quantity = 0) {
-    const cartData = structuredClone(cartItems);
-    quantity = cartData[itemId][size];
+  function clearCart() {
     setCartItems({});
   }
 
@@ -166,6 +178,22 @@ function ShopContextProvider({ children }) {
     return cartTotal;
   }
 
+  function getCartTotalPrice() {
+    let totalPrice = 0;
+    for (const itemId in cartItems) {
+      const itemInfo = products.find((item) => item.id === itemId);
+      if (!itemInfo) continue;
+
+      for (const size in cartItems[itemId]) {
+        const quantity = cartItems[itemId][size];
+        if (quantity > 0) {
+          totalPrice += itemInfo.price * quantity;
+        }
+      }
+    }
+    return totalPrice;
+  }
+
   const value = {
     sort,
     setSort,
@@ -173,6 +201,8 @@ function ShopContextProvider({ children }) {
     setCategories,
     sizes,
     setSizes,
+    cartItems,
+    setCartItems,
     womenProductsFull: womenProducts, // full unfiltered
     womenProducts: sortedWomenProducts, // filtered for display
     menProductsFull: menProducts,
@@ -187,6 +217,7 @@ function ShopContextProvider({ children }) {
     buyNowProduct,
     buyNowSize,
     getTotalCartNumber,
+    getCartTotalPrice,
     currency: 'GH₵',
   };
 

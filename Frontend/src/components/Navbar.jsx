@@ -11,7 +11,7 @@ function Navbar() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (query.trim() === '') {
+    if (!query.trim()) {
       setResults([]);
       return;
     }
@@ -22,7 +22,7 @@ function Navbar() {
           p.name.toLowerCase().includes(query.toLowerCase()) ||
           p.category.toLowerCase().includes(query.toLowerCase())
       )
-      .slice(0, 6); // limit suggestions
+      .slice(0, 6);
 
     setResults(filtered);
   }, [query, products]);
@@ -35,8 +35,9 @@ function Navbar() {
 
   return (
     <nav className="nav">
-      <div className="container flex-sb">
-        <Link to="/" className="logo-container flex gap">
+      <div className="container">
+        {/* LOGO */}
+        <Link to="/" className="logo-container">
           <img src={assests.logo} alt="logo" />
           <p>Mena's Closet</p>
         </Link>
@@ -50,38 +51,46 @@ function Navbar() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
+          <img src={assests.search_icon} alt="search" />
 
-          <img src={assests.search_icon} alt="search-icon" />
-
-          {/* DROPDOWN */}
           {results.length > 0 && (
             <div className="search-dropdown">
-              {results.map((item) => (
-                <div
-                  key={item.id}
-                  className="search-item"
-                  onClick={() => handleSelect(item.id)}
-                >
-                  <img src={item.images[0]} alt={item.name} />
-                  <div>
-                    <p className="search-name">{item.name}</p>
-                    <p className="search-price">
-                      {currency}
-                      {item.price}
-                    </p>
+              <div className="search-dropdown-inner">
+                {results.map((item) => (
+                  <div
+                    key={item.id}
+                    className="search-item"
+                    onClick={() => handleSelect(item.id)}
+                  >
+                    <img src={item.images[0]} alt={item.name} />
+                    <div>
+                      <p className="search-name">{item.name}</p>
+                      <p className="search-price">
+                        {currency}
+                        {item.price}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
         </div>
 
-        <div className="nav-icons-container flex gap1">
-          <div className="cart-icon-container">
-            <img src={assests.cart_icon} alt="cart-bag" />
-            <span className="cart-number">{getTotalCartNumber}</span>
+        {/* ICONS */}
+        <div className="nav-icons-container">
+          <Link to="/cart" className="cart-icon-container">
+            <img src={assests.cart_icon} alt="cart" />
+            <span className="cart-number">{getTotalCartNumber() || 0}</span>
+          </Link>
+
+          <div className="profile-container">
+            <img src={assests.user_icon} alt="user" />
+            <div className="profile-dropdown">
+              <Link to="/orders">Orders</Link>
+              <Link to="/login">Sign In</Link>
+            </div>
           </div>
-          <img src={assests.user_icon} alt="user_icon" />
         </div>
       </div>
     </nav>

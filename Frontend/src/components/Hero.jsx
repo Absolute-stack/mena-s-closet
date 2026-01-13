@@ -9,36 +9,42 @@ function Hero() {
         <div className="hero-img-container">
           <img
             className="hero-img"
-            src={'/hero.avif'}
-            alt="female black model posing in-front of camera"
+            src="/hero.avif"
+            alt="female black model posing in front of camera"
             loading="eager"
             fetchPriority="high"
             decoding="async"
+            width="1920"
+            height="1080"
           />
-        </div>
-        <div className="hero-content">
-          <div className="hero-tag">
-            <p>Premium Collection</p>
-          </div>
-          <h2 className="hero-title">
-            Quality Fashion Delivered to Your Doorstep in Ghana
-          </h2>
-          <p className="hero-subtitle">
-            Shop with Confidence - Easy Returns, Secure Payment, Fast Delivery
-          </p>
-          <div className="btn-container">
-            <Link to="/women">
-              <button type="button" className="hero-main-btn flex gap">
-                Shop Women
-                <img src={assests.right_arrow} alt="right_arrow" />
-              </button>
-            </Link>
-            <Link to="/men">
-              <button type="button" className="hero-sec-btn flex gap">
-                Shop Men
-                <img src={assests.right_arrow} alt="right_arrow" />
-              </button>
-            </Link>
+
+          {/* ABSOLUTE CONTENT (UNCHANGED BEHAVIOR) */}
+          <div className="hero-content">
+            <div className="hero-tag">
+              <p>Premium Collection</p>
+            </div>
+
+            <h2 className="hero-title">
+              Quality Fashion Delivered to Your Doorstep in Ghana
+            </h2>
+
+            <p className="hero-subtitle">
+              Shop with Confidence - Easy Returns, Secure Payment, Fast Delivery
+            </p>
+
+            <div className="btn-container">
+              <Link to="/women" className="hero-main-btn flex gap">
+                <p>Shop</p>
+                <p>Women</p>
+                <img src={assests.right_arrow} alt="" />
+              </Link>
+
+              <Link to="/men" className="hero-sec-btn flex gap">
+                <p>Shop</p>
+                <p>Men</p>
+                <img src={assests.right_arrow} alt="" />
+              </Link>
+            </div>
           </div>
         </div>
       </div>

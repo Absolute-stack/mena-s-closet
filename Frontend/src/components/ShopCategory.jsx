@@ -13,19 +13,19 @@ function ShopCategory() {
         </div>
         <div className="category-grid">
           <Link to="/women" className="card">
-            <img src={assests.dress_img} alt="women's-fashion" loading="lazy" />
+            <img src="/dress_image.avif" alt="women's-fashion" loading="lazy" />
             <div className="card-content">
               <p>Women's Fashion</p>
             </div>
           </Link>
           <Link to="/men" className="card">
-            <img src={assests.mens_img} alt="men's-fashion" loading="lazy" />
+            <img src="/mens_image.avif" alt="men's-fashion" loading="lazy" />
             <div className="card-content">
               <p>Men's Fashion</p>
             </div>
           </Link>
           <Link to="/accessories" className="card">
-            <img src={assests.accessories} alt="accessories" loading="lazy" />
+            <img src="accessories.avif" alt="accessories" loading="lazy" />
             <div className="card-content">
               <p>Accessories</p>
             </div>
