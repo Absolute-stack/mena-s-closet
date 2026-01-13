@@ -33,10 +33,12 @@ function Hero() {
                 <img src={assests.right_arrow} alt="right_arrow" />
               </button>
             </Link>
-            <button type="button" className="hero-sec-btn flex gap">
-              How it Works
-              <img src={assests.clock_icon} alt="clock_icon" />
-            </button>
+            <Link to="/men">
+              <button type="button" className="hero-sec-btn flex gap">
+                Shop Men
+                <img src={assests.right_arrow} alt="right_arrow" />
+              </button>
+            </Link>
           </div>
         </div>
       </div>

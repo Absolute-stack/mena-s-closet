@@ -302,7 +302,12 @@ export const allProducts = [
     accessories: false,
     price: 34.99,
     bestseller: true,
-    images: ['/women_1.avif'],
+    images: [
+      '/women_1.avif',
+      '/women_1_2.avif',
+      '/women_1_3.avif',
+      '/women_1_4.avif',
+    ],
     alt: "Women's essential cotton t-shirt",
     description:
       'Soft breathable cotton t-shirt designed for everyday comfort.',

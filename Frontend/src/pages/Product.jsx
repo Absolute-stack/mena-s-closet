@@ -1,17 +1,18 @@
 import { useContext, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ShopContext } from '../components/ShopContext';
 import PageNav from '../components/PageNav';
 import Productitem from '../components/Productitem';
 import './Product.css';
 
 function Product() {
-  const { products, currency } = useContext(ShopContext);
+  const { products, addToCart, currency, buyNow } = useContext(ShopContext);
   const { id } = useParams();
-
   const [fabric, setFabric] = useState(false);
   const [delivery, setDelivery] = useState(false);
-
+  const [s, setS] = useState('');
+  const navigate = useNavigate();
   function handleClick(target) {
     target((prevValue) => !prevValue);
   }
@@ -29,11 +30,29 @@ function Product() {
     setImage(src);
   }
 
+  function handleSize(e) {
+    const size = e.target.textContent;
+    setS(size);
+  }
+
   useEffect(() => {
     setRelatedProducts(
-      products.filter((p) => p.category === product.category).slice(0, 4)
+      products
+        .filter(
+          (p) =>
+            p.category === product.category &&
+            p.gender === product.gender &&
+            p.id !== product.id
+        )
+        .slice(0, 4)
     );
   }, [product, products]);
+
+  useEffect(() => {
+    if (product?.images?.[0]) {
+      setImage(product.images[0]);
+    }
+  }, [product]);
 
   const isAccessory =
     product.accessories === true ? 'Accessories' : `${product.gender}`;
@@ -98,15 +117,29 @@ function Product() {
                   <button
                     key={index}
                     type="button"
-                    className="product-size-btn"
+                    className={`product-size-btn ${s === size ? 'active' : ''}`}
+                    onClick={handleSize}
                   >
                     {size}
                   </button>
                 );
               })}
             </div>
-            <button type="button" className="add-to-cart-btn">
+            <button
+              type="button"
+              onClick={() => addToCart(s, product.id)}
+              className="add-to-cart-btn"
+              disabled={s === '' ? true : false}
+            >
               Add to Cart
+            </button>
+            <button
+              type="button"
+              className="buy-btn"
+              disabled={s === '' ? true : false}
+              onClick={() => buyNow(product.id, s)}
+            >
+              Buy Now
             </button>
             <div className="payment-container">
               <div className="payment-container-top flex gap1">
@@ -264,6 +297,7 @@ function Product() {
             </div>
           </div>
         </div>
+        <h2 className="related-products-title">You May Also Like</h2>
         <div className="related-products">
           {relatedProducts.map((product, index) => {
             return (

@@ -1,5 +1,7 @@
-import { createContext, useMemo, useState } from 'react';
+import { createContext, useEffect, useMemo, useState } from 'react';
 import { allProducts } from '../assets/assets.js';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 export const ShopContext = createContext();
 
@@ -7,6 +9,10 @@ function ShopContextProvider({ children }) {
   const [sort, setSort] = useState('default');
   const [categories, setCategories] = useState([]);
   const [sizes, setSizes] = useState([]);
+  let [cartItems, setCartItems] = useState({});
+  const [buyNowProduct, setBuyNowProduct] = useState();
+  const [buyNowSize, setBuyNowSize] = useState();
+  const navigate = useNavigate();
 
   // base filtered data (never mutated)
   const products = useMemo(() => {
@@ -29,7 +35,9 @@ function ShopContextProvider({ children }) {
     return allProducts.filter((product) => product.accessories);
   }, []);
 
-  const relatedProducts = useMemo(() => {}, []);
+  const relatedProducts = useMemo(() => {
+    return allProducts.filter;
+  }, []);
 
   // sorted version (derived safely)
   const sortedWomenProducts = useMemo(() => {
@@ -65,7 +73,7 @@ function ShopContextProvider({ children }) {
   }, [sort, womenProducts, categories, sizes]);
 
   const sortedMenProducts = useMemo(() => {
-    const filtered = [...menProducts]; // copy first
+    let filtered = [...menProducts]; // copy first
 
     if (categories.length > 0) {
       filtered = filtered.filter((p) => categories.includes(p.category));
@@ -105,6 +113,59 @@ function ShopContextProvider({ children }) {
     }
   }, [sort, accessoryProducts]);
 
+  function addToCart(size, itemId) {
+    const cartData = structuredClone(cartItems);
+    if (!size) return toast.error('A Size must be selected');
+
+    if (!cartData[itemId]) {
+      cartData[itemId] = {};
+    }
+    cartData[itemId][size] = (cartData[itemId][size] || 0) + 1;
+    setCartItems(cartData);
+    console.log('Successfully added to cart');
+  }
+
+  function updateCart(size, itemId, quantity) {
+    const cartData = structuredClone(cartItems);
+    quantity = cartData[itemId][size];
+    setCartItems(cartData);
+  }
+
+  function clearCart(size, itemId, quantity = 0) {
+    const cartData = structuredClone(cartItems);
+    quantity = cartData[itemId][size];
+    setCartItems({});
+  }
+
+  function buyNow(itemId, size) {
+    if (!size) {
+      toast.error('Please select a Size');
+      return null;
+    }
+
+    const product = products.find((p) => p.id === itemId);
+    if (!product) {
+      toast.error('Product Not Found');
+      return null;
+    }
+    setBuyNowProduct(product);
+    setBuyNowSize(size);
+    navigate('/placeorders');
+  }
+
+  function getTotalCartNumber() {
+    let cartTotal = 0;
+
+    for (const itemId in cartItems) {
+      for (const size in cartItems[itemId]) {
+        if (cartItems[itemId][size] > 0) {
+          cartTotal += cartItems[itemId][size];
+        }
+      }
+    }
+    return cartTotal;
+  }
+
   const value = {
     sort,
     setSort,
@@ -119,6 +180,13 @@ function ShopContextProvider({ children }) {
     accessoryProductsFull: accessoryProducts,
     accessoryProducts: sortedAccessories,
     products,
+    addToCart,
+    updateCart,
+    clearCart,
+    buyNow,
+    buyNowProduct,
+    buyNowSize,
+    getTotalCartNumber,
     currency: 'GH₵',
   };
 

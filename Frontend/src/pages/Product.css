@@ -1,7 +1,7 @@
 .product-container {
   align-items: flex-start;
   height: 650px;
-  margin-block-end: 30rem;
+  margin-block-end: 25rem;
 }
 
 .product-img-wrapper {
@@ -18,7 +18,7 @@
 }
 
 .product-information-wrapper h2 {
-  font-size: 4.2rem;
+  font-size: 3rem;
   line-height: 1;
   font-weight: 500;
 }
@@ -49,17 +49,20 @@
   transition: 0.3s ease;
 }
 
-.product-sizes-container button.active {
-  border: 2px solid var(--main-clr);
-}
-
 .product-sizes-container button:where(:hover, :focus-visible) {
   transform: translateY(-2px);
   background-color: var(--main-clr);
   color: var(--sec-clr);
 }
 
-.add-to-cart-btn {
+.product-size-btn.active {
+  border: 2px solid var(--main-clr);
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px,
+    rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
+}
+
+.add-to-cart-btn,
+.buy-btn {
   margin-inline: auto;
   padding: 0.5rem;
   background-color: var(--main-clr);
@@ -72,7 +75,30 @@
   transition: 0.3s ease;
 }
 
+.buy-btn {
+  margin-block-start: 1rem;
+}
+
+.add-to-cart-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.buy-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .add-to-cart-btn:where(:hover, :focus-visible) {
+  background-color: var(--sec-clr);
+  color: var(--main-clr);
+  transform: translateY(-2px);
+  outline: 2px solid var(--main-clr);
+}
+
+.buy-btn:where(:hover, :focus-visible) {
   background-color: var(--sec-clr);
   color: var(--main-clr);
   transform: translateY(-2px);
@@ -236,20 +262,44 @@
   display: flex;
   align-items: center;
   gap: 2rem;
-  margin-block-end: 15rem;
+  margin-block-end: 10rem;
 }
 
 .related-products .product-item {
   width: 400px;
-  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
-    rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
   border-radius: 1rem;
   background-color: var(--sec-clr);
+  padding-block-end: 0.5rem;
   overflow: hidden;
 }
 
-.related-products .product-item img {
+.related-products .product-img-container {
+  width: 100%;
+  aspect-ratio: 1 / 1; /* square */
+  overflow: hidden;
+}
+
+.related-products .product-img-container img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover; /* fills nicely */
+  display: block;
+  transition: 0.3s ease;
+}
+
+.related-products .product-img-container img:where(:hover, :focus-visible) {
+  transform: scale(1.05);
+}
+
+.related-products-title {
+  margin-block-end: 1rem;
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.related-products .product-info-container {
+  padding-inline-start: 0.5rem;
 }
