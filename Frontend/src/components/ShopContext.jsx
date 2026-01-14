@@ -14,7 +14,31 @@ function ShopContextProvider({ children }) {
   const [buyNowSize, setBuyNowSize] = useState();
   const navigate = useNavigate();
 
-  // base filtered data (never mutated)
+  /* =======================
+     GUEST CART PERSISTENCE
+     ======================= */
+
+  // Load cart from localStorage on first render
+  useEffect(() => {
+    const storedCart = localStorage.getItem('cart');
+    if (storedCart) {
+      try {
+        setCartItems(JSON.parse(storedCart));
+      } catch (error) {
+        console.error('Failed to load cart from localStorage');
+      }
+    }
+  }, []);
+
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  /* =======================
+     PRODUCTS (BASE DATA)
+     ======================= */
+
   const products = useMemo(() => {
     return allProducts.slice();
   }, []);
@@ -39,32 +63,30 @@ function ShopContextProvider({ children }) {
     return allProducts.filter;
   }, []);
 
-  // sorted version (derived safely)
+  /* =======================
+     FILTER + SORT
+     ======================= */
+
   const sortedWomenProducts = useMemo(() => {
     let filtered = [...womenProducts];
 
-    // CATEGORY FILTER
     if (categories.length > 0) {
       filtered = filtered.filter((p) => categories.includes(p.category));
     }
 
-    // SIZE FILTER
     if (sizes.length > 0) {
       filtered = filtered.filter((p) =>
         p.sizes?.some((s) => sizes.includes(s))
       );
     }
 
-    // SORT
     switch (sort) {
       case 'Low-High':
         filtered.sort((a, b) => a.price - b.price);
         break;
-
       case 'High-Low':
         filtered.sort((a, b) => b.price - a.price);
         break;
-
       default:
         break;
     }
@@ -73,7 +95,7 @@ function ShopContextProvider({ children }) {
   }, [sort, womenProducts, categories, sizes]);
 
   const sortedMenProducts = useMemo(() => {
-    let filtered = [...menProducts]; // copy first
+    let filtered = [...menProducts];
 
     if (categories.length > 0) {
       filtered = filtered.filter((p) => categories.includes(p.category));
@@ -93,7 +115,6 @@ function ShopContextProvider({ children }) {
         filtered.sort((a, b) => b.price - a.price);
         break;
       default:
-        filtered;
         break;
     }
 
@@ -113,6 +134,10 @@ function ShopContextProvider({ children }) {
     }
   }, [sort, accessoryProducts]);
 
+  /* =======================
+     CART FUNCTIONS
+     ======================= */
+
   function addToCart(size, itemId) {
     const cartData = structuredClone(cartItems);
     if (!size) return toast.error('A Size must be selected');
@@ -122,7 +147,6 @@ function ShopContextProvider({ children }) {
     }
     cartData[itemId][size] = (cartData[itemId][size] || 0) + 1;
     setCartItems(cartData);
-    console.log('Successfully added to cart');
   }
 
   function updateCart(size, itemId, quantity) {
@@ -131,15 +155,12 @@ function ShopContextProvider({ children }) {
     if (!cartData[itemId] || quantity < 0) return;
 
     if (quantity === 0) {
-      // Remove this size
       delete cartData[itemId][size];
-
-      // If no sizes left, remove the product
       if (Object.keys(cartData[itemId]).length === 0) {
         delete cartData[itemId];
       }
     } else {
-      cartData[itemId][size] = quantity; // ✅ update quantity
+      cartData[itemId][size] = quantity;
     }
 
     setCartItems(cartData);
@@ -160,14 +181,18 @@ function ShopContextProvider({ children }) {
       toast.error('Product Not Found');
       return null;
     }
+
     setBuyNowProduct(product);
     setBuyNowSize(size);
     navigate('/placeorders');
   }
 
+  /* =======================
+     CART TOTALS
+     ======================= */
+
   function getTotalCartNumber() {
     let cartTotal = 0;
-
     for (const itemId in cartItems) {
       for (const size in cartItems[itemId]) {
         if (cartItems[itemId][size] > 0) {
@@ -194,6 +219,10 @@ function ShopContextProvider({ children }) {
     return totalPrice;
   }
 
+  /* =======================
+     CONTEXT VALUE
+     ======================= */
+
   const value = {
     sort,
     setSort,
@@ -203,8 +232,8 @@ function ShopContextProvider({ children }) {
     setSizes,
     cartItems,
     setCartItems,
-    womenProductsFull: womenProducts, // full unfiltered
-    womenProducts: sortedWomenProducts, // filtered for display
+    womenProductsFull: womenProducts,
+    womenProducts: sortedWomenProducts,
     menProductsFull: menProducts,
     menProducts: sortedMenProducts,
     accessoryProductsFull: accessoryProducts,
