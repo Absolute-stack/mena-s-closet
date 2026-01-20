@@ -1,145 +1,467 @@
-import { useContext } from 'react';
-import { Link } from 'react-router-dom';
-import { assests } from '../assets/assets';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { useState, useContext, useEffect } from 'react';
 import { ShopContext } from '../components/ShopContext';
 import './PlaceOrders.css';
 
 function PlaceOrders() {
-  const { buyNowProduct, buyNowSize, currency } = useContext(ShopContext);
+  const {
+    cartItems,
+    getCartTotalPrice,
+    products,
+    user,
+    currency,
+    backend,
+    buyNowProduct,
+    buyNowSize,
+    setBuyNowProduct,
+    setBuyNowSize,
+  } = useContext(ShopContext);
 
-  const pGender = buyNowProduct.gender;
-  const pId = buyNowProduct.id;
-  const price = buyNowProduct.price;
+  const navigate = useNavigate();
+  const PAYSTACK_KEY = import.meta.env.VITE_PAYSTACK_KEY;
+
+  const [loading, setLoading] = useState(false);
+  const [address, setAddress] = useState({
+    fullname: '',
+    phone: '',
+    email: user?.email || '',
+    region: '',
+    city: '',
+    street: '',
+    landmark: '',
+    directions: '',
+  });
+
+  // Determine if this is Buy Now or Cart checkout
+  const isBuyNow = buyNowProduct && buyNowSize;
+
+  // Update email when user logs in
+  useEffect(() => {
+    if (user?.email) {
+      setAddress((prev) => ({ ...prev, email: user.email }));
+    }
+  }, [user]);
+
+  // Build cart data - EITHER from buyNow OR from cartItems
+  const cartData = [];
+
+  if (isBuyNow) {
+    // Buy Now: Single product
+    cartData.push({
+      productId: buyNowProduct.id,
+      name: buyNowProduct.name,
+      size: buyNowSize,
+      price: buyNowProduct.price,
+      quantity: 1,
+      image: buyNowProduct.images?.[0],
+    });
+  } else {
+    // Cart checkout: Multiple products
+    for (const itemId in cartItems) {
+      for (const size in cartItems[itemId]) {
+        const product = products.find((p) => p.id === itemId);
+        if (!product) continue;
+        cartData.push({
+          productId: itemId,
+          name: product.name,
+          size,
+          price: product.price,
+          quantity: cartItems[itemId][size],
+          image: product.images?.[0],
+        });
+      }
+    }
+  }
+
+  // Check if cart is empty
+  useEffect(() => {
+    if (cartData.length === 0) {
+      toast.info('Your cart is empty');
+      navigate('/');
+    }
+  }, [cartData.length, navigate]);
+
+  // Handle form input
+  function handleChange(e) {
+    setAddress({ ...address, [e.target.name]: e.target.value });
+  }
+
+  // Validate form
+  function validateForm() {
+    const required = ['fullname', 'phone', 'email', 'region', 'city', 'street'];
+
+    for (const field of required) {
+      if (!address[field] || address[field].trim() === '') {
+        toast.error(`Please fill in ${field.replace('_', ' ')}`);
+        return false;
+      }
+    }
+
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(address.email)) {
+      toast.error('Please enter a valid email');
+      return false;
+    }
+
+    // Validate phone
+    if (address.phone.length < 10) {
+      toast.error('Please enter a valid phone number');
+      return false;
+    }
+
+    return true;
+  }
+
+  // Calculate totals
+  const subtotal = isBuyNow ? buyNowProduct.price : getCartTotalPrice();
+  const deliveryFee = 30;
+  const totalAmount = subtotal + deliveryFee;
+
+  // Handle checkout
+  async function handleCheckout(e) {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+    if (cartData.length === 0) {
+      toast.error('Your cart is empty');
+      return;
+    }
+
+    if (!totalAmount || isNaN(totalAmount) || totalAmount <= 0) {
+      toast.error('Invalid cart total');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Check if Paystack script is loaded
+      if (typeof PaystackPop === 'undefined') {
+        toast.error('Payment system not loaded. Please refresh the page.');
+        setLoading(false);
+        return;
+      }
+
+      // Initialize Paystack
+      const handler = PaystackPop.setup({
+        key: PAYSTACK_KEY,
+        email: address.email,
+        amount: totalAmount * 100, // Convert to pesewas
+        currency: 'GHS',
+        metadata: {
+          custom_fields: [
+            {
+              display_name: 'Customer Name',
+              variable_name: 'customer_name',
+              value: address.fullname,
+            },
+            {
+              display_name: 'Phone Number',
+              variable_name: 'phone',
+              value: address.phone,
+            },
+          ],
+        },
+        callback: function (response) {
+          // Payment successful
+          verifyPaymentAndCreateOrder(response.reference);
+        },
+        onClose: function () {
+          toast.info('Payment cancelled');
+          setLoading(false);
+        },
+      });
+
+      handler.openIframe();
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast.error('Failed to initialize payment');
+      setLoading(false);
+    }
+  }
+
+  // Verify payment and create order
+  async function verifyPaymentAndCreateOrder(reference) {
+    try {
+      // Create order
+      const orderResponse = await fetch(`${backend}/api/order/place`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          items: cartData,
+          address: {
+            firstName: address.fullname.split(' ')[0] || address.fullname,
+            lastName: address.fullname.split(' ').slice(1).join(' ') || '',
+            email: address.email,
+            street: `${address.street}${
+              address.landmark ? ', ' + address.landmark : ''
+            }`,
+            city: address.city,
+            state: address.region,
+            zipcode: '00000',
+            country: 'Ghana',
+            phone: address.phone,
+          },
+          paymentInfo: {
+            method: 'Paystack',
+            reference: reference,
+            status: 'Paid',
+          },
+        }),
+      });
+
+      const orderData = await orderResponse.json();
+
+      if (orderData.success) {
+        // Verify payment with backend
+        await fetch(`${backend}/api/order/verify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            reference: reference,
+            orderId: orderData.order._id,
+          }),
+        });
+
+        // Clear buyNow state if this was a Buy Now order
+        if (isBuyNow) {
+          setBuyNowProduct(null);
+          setBuyNowSize(null);
+        }
+
+        toast.success('Order placed successfully!');
+        navigate(`/verify?reference=${reference}&success=true`);
+      } else {
+        toast.error(orderData.message || 'Failed to create order');
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error('Order creation error:', error);
+      toast.error('Failed to create order');
+      setLoading(false);
+    }
+  }
+
   return (
     <main className="placeOrders-section">
       <div className="container">
-        <div className="place-order-page-nav flex gap">
-          <Link to="/" className="link">
-            Home
-          </Link>
-          <span>&gt;</span>
-          <Link to={`/${pGender}`} className="link">
-            {pGender}
-          </Link>
-          <span>&gt;</span>
-          <Link to={`/product/${pId}`} className="link">
-            {pId}
-          </Link>
-          <span>&gt;</span>
-          <a href="#" className="link">
-            PlaceOrders
-          </a>
-        </div>
         <div className="wrapper">
           <div className="address-form">
-            <form action="#">
+            <form onSubmit={handleCheckout}>
+              {/* Personal Details */}
               <div className="personal-wrapper">
                 <div className="form-item-title flex gap1">
-                  <img
-                    src={assests.user_icon}
-                    alt="human-figure"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <p>1.Personal Details</p>
+                  <p>1. Personal Details</p>
                 </div>
                 <div className="personal-detail-input-wrapper flex gap2">
                   <div className="item">
-                    <p>Full Name</p>
-                    <input type="text" placeholder="John Mensah" required />
+                    <p>Full Name *</p>
+                    <input
+                      type="text"
+                      name="fullname"
+                      placeholder="John Mensah"
+                      value={address.fullname}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
                   <div className="item">
-                    <p>Phone Number</p>
-                    <input type="number" placeholder="0551449038" required />
+                    <p>Phone Number *</p>
+                    <input
+                      type="tel"
+                      name="phone"
+                      placeholder="0551449038"
+                      value={address.phone}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="personal-detail-input-wrapper">
+                  <div className="item">
+                    <p>Email Address *</p>
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="john@example.com"
+                      value={address.email}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
                 </div>
               </div>
+
+              {/* Delivery Address */}
               <div className="delivery-wrapper">
                 <div className="form-item-title flex gap1">
-                  <img
-                    src={assests.user_icon}
-                    alt="human-figure"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <p>2.Delivery Address</p>
+                  <p>2. Delivery Address</p>
                 </div>
                 <div className="personal-detail-input-wrapper flex gap2">
                   <div className="item">
-                    <label htmlFor="select" className="label">
-                      Region
+                    <label htmlFor="region" className="label">
+                      Region *
                     </label>
-                    <select className="select" name="select required">
-                      <option value="">Accra</option>
-                      <option value="" selected>
-                        Kumasi
-                      </option>
-                      <option value="">Bono</option>
-                      <option value="">Northern</option>
-                      <option value="">Eastern</option>
+                    <select
+                      className="select"
+                      name="region"
+                      value={address.region}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="">Select Region</option>
+                      <option value="Greater Accra">Greater Accra</option>
+                      <option value="Ashanti">Ashanti</option>
+                      <option value="Bono">Bono</option>
+                      <option value="Northern">Northern</option>
+                      <option value="Eastern">Eastern</option>
+                      <option value="Western">Western</option>
+                      <option value="Central">Central</option>
+                      <option value="Volta">Volta</option>
                     </select>
                   </div>
                   <div className="item">
-                    <p>Digital Address</p>
-                    <input type="text" placeholder="AK-GH-11-00" required />
+                    <p>City *</p>
+                    <input
+                      type="text"
+                      name="city"
+                      placeholder="Accra"
+                      value={address.city}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
                 </div>
+
                 <div className="sub-main">
                   <p className="landmark-title flex gap">
-                    Nearest Landmark<span>*</span>
+                    Street Address <span>*</span>
                   </p>
                   <input
                     type="text"
-                    placeholder="e.g Near Shell Station, opposite the Big Neem Tree (Optional)"
+                    name="street"
+                    placeholder="123 Main Street"
+                    value={address.street}
+                    onChange={handleChange}
+                    required
                   />
                 </div>
+
+                <div className="sub-main">
+                  <p className="landmark-title">Nearest Landmark (Optional)</p>
+                  <input
+                    type="text"
+                    name="landmark"
+                    placeholder="e.g Near Shell Station, opposite the Big Neem Tree"
+                    value={address.landmark}
+                    onChange={handleChange}
+                  />
+                </div>
+
                 <div className="tertiary-section">
-                  <p className="">Additional Directions</p>
-                  <textarea placeholder="Describe Your Gate House Color Or Specifi Entry Instructions..."></textarea>
+                  <p>Additional Directions (Optional)</p>
+                  <textarea
+                    name="directions"
+                    placeholder="Describe your gate house color or specific entry instructions..."
+                    value={address.directions}
+                    onChange={handleChange}
+                  ></textarea>
                 </div>
               </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                className="proceed-btn"
+                disabled={loading}
+                style={{
+                  opacity: loading ? 0.6 : 1,
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {loading ? 'PROCESSING...' : 'PROCEED TO PAYMENT'}
+              </button>
             </form>
           </div>
+
+          {/* Order Summary */}
           <div className="order-map-section">
             <div className="order-summary">
               <p className="order-title">Order Summary</p>
+
+              {/* Cart Items */}
+              <div className="order-items" style={{ marginBottom: '16px' }}>
+                {cartData.map((item, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      display: 'flex',
+                      gap: '12px',
+                      alignItems: 'center',
+                      marginBottom: '12px',
+                    }}
+                  >
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      style={{
+                        width: '50px',
+                        height: '50px',
+                        objectFit: 'cover',
+                        borderRadius: '4px',
+                      }}
+                    />
+                    <div style={{ flex: 1 }}>
+                      <p
+                        style={{
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          marginBottom: '4px',
+                        }}
+                      >
+                        {item.name}
+                      </p>
+                      <p style={{ fontSize: '12px', color: '#666' }}>
+                        Size: {item.size} | Qty: {item.quantity}
+                      </p>
+                    </div>
+                    <p style={{ fontWeight: '600' }}>
+                      {currency}
+                      {(item.price * item.quantity).toFixed(2)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
               <p className="order-subtotal">
-                SubTotal(1 item){' '}
+                SubTotal (
+                {cartData.reduce((sum, item) => sum + item.quantity, 0)} item
+                {cartData.reduce((sum, item) => sum + item.quantity, 0) !== 1
+                  ? 's'
+                  : ''}
+                )
                 <span>
                   {currency}
-                  {price}
+                  {subtotal.toFixed(2)}
                 </span>
               </p>
-              <p className="order-delivery">
+              <p className="order-delivery flex-sb">
                 Delivery Fee
-                <span>{currency} 30</span>
+                <span>
+                  {currency} {deliveryFee}
+                </span>
               </p>
               <p className="total-amount">Total Amount</p>
-              <p className=" total-number flex-sb">
+              <p className="total-number flex-sb">
                 {currency}
-                {(price + 30).toFixed(2)}{' '}
-                <span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                  >
-                    <path
-                      d="M12 1.976 1.924 4.215 2 5.09c.107 1.175 1.139 11.54 4.441 13.742a52.689 52.689 0 0 0 5.112 3.068l.447.223.447-.223a52.833 52.833 0 0 0 5.108-3.063C20.857 16.63 21.889 6.265 22 5.09l.079-.875zm4.445 15.192c-2.1 1.4-3.7 2.3-4.445 2.7-.741-.4-2.35-1.3-4.445-2.7C5.791 15.992 4.547 9.9 4.085 5.783L12 4.024l7.915 1.759c-.462 4.117-1.706 10.209-3.47 11.385z"
-                      style={{ fill: '#ffa17cff' }}
-                    />
-                    <path
-                      d="m9.707 10.293-1.414 1.414 3.862 3.863 4.677-7.015-1.664-1.11-3.323 4.985-2.138-2.137z"
-                      style={{ fill: '#ffa17cff' }}
-                    />
-                  </svg>
-                </span>
+                {totalAmount.toFixed(2)}
               </p>
-              <button type="button" className="proceed-btn">
-                PROCEED TO PAYMENT
-              </button>
               <p className="order-bottom">
-                SECURE CHECKOUT POWERED BY MENA'S CLOSET
+                SECURE CHECKOUT POWERED BY PAYSTACK
               </p>
             </div>
           </div>

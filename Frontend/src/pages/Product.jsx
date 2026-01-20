@@ -12,7 +12,10 @@ function Product() {
   const [fabric, setFabric] = useState(false);
   const [delivery, setDelivery] = useState(false);
   const [s, setS] = useState('');
+  const [image, setImage] = useState(''); // Initialize as empty string
+  const [relatedProducts, setRelatedProducts] = useState([]);
   const navigate = useNavigate();
+
   function handleClick(target) {
     target((prevValue) => !prevValue);
   }
@@ -22,9 +25,6 @@ function Product() {
   if (!products)
     return <div>Something Went Wrong Fetching Data For Product.</div>;
   if (!product) return <div>Product not Found</div>;
-
-  const [image, setImage] = useState(product.images[0]);
-  const [relatedProducts, setRelatedProducts] = useState([]);
 
   function handleImages(src) {
     setImage(src);
@@ -49,10 +49,15 @@ function Product() {
   }, [product, products]);
 
   useEffect(() => {
+    // Scroll to top when product changes
+    window.scrollTo(0, 0);
+
+    // Reset all product-specific state
     if (product?.images?.[0]) {
       setImage(product.images[0]);
     }
-  }, [product]);
+    setS(''); // Reset size selection
+  }, [id, product?.images]); // Dependencies: id and images array
 
   const isAccessory =
     product.accessories === true ? 'Accessories' : `${product.gender}`;

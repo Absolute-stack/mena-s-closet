@@ -1,7 +1,7 @@
 import { useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ShopContext } from '../components/ShopContext';
 import './Cart.css';
-import CartEmpty from '../components/CartEmpty';
 
 function Cart() {
   const {
@@ -11,14 +11,18 @@ function Cart() {
     updateCart,
     getCartTotalPrice,
     getTotalCartNumber,
+    isLoadingCart,
   } = useContext(ShopContext);
 
-  // derive cartData on each render
+  const navigate = useNavigate();
+
+  // Derive cart data from cartItems
   const cartData = [];
   for (const itemId in cartItems) {
     for (const size in cartItems[itemId]) {
       const product = products.find((p) => p.id === itemId);
       if (!product) continue;
+
       cartData.push({
         ...product,
         productId: itemId,
@@ -28,13 +32,53 @@ function Cart() {
     }
   }
 
-  if (cartData.length === 0) return <CartEmpty />;
+  // Show loading state
+  if (isLoadingCart) {
+    return (
+      <main className="cart-page">
+        <div className="container">
+          <p style={{ textAlign: 'center', padding: '40px' }}>
+            Loading cart...
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  // Show empty cart
+  if (cartData.length === 0) {
+    return (
+      <main className="cart-page">
+        <div className="container">
+          <div style={emptyCartStyles.container}>
+            <div style={emptyCartStyles.icon}>🛒</div>
+            <h2>Your Cart is Empty</h2>
+            <p>Add some items to get started!</p>
+            <button
+              onClick={() => navigate('/')}
+              style={emptyCartStyles.button}
+            >
+              Continue Shopping
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  const subtotal = getCartTotalPrice();
+  const deliveryFee = 30; // Your original delivery fee
+  const total = subtotal + deliveryFee;
+  const totalItems = getTotalCartNumber();
 
   return (
     <main className="cart-page">
       <div className="container">
         {cartData.map((item, index) => (
-          <div className="cart-item" key={index}>
+          <div
+            className="cart-item"
+            key={`${item.productId}-${item.size}-${index}`}
+          >
             <div className="cart-item-img-holder">
               <img
                 src={item.images?.[0]}
@@ -99,24 +143,27 @@ function Cart() {
             </div>
           </div>
         ))}
+
         <div className="order-map-section">
           <div className="order-summary">
             <p className="order-title">Order Summary</p>
             <p className="order-subtotal">
-              SubTotal({getTotalCartNumber()} item){' '}
+              SubTotal ({totalItems} {totalItems === 1 ? 'item' : 'items'})
               <span>
                 {currency}
-                {getCartTotalPrice()}
+                {subtotal.toFixed(2)}
               </span>
             </p>
             <p className="order-delivery flex-sb">
               Delivery Fee
-              <span>{currency} 30</span>
+              <span>
+                {currency} {deliveryFee}
+              </span>
             </p>
             <p className="total-amount">Total Amount</p>
-            <p className=" total-number flex-sb">
+            <p className="total-number flex-sb">
               {currency}
-              {(getCartTotalPrice() + 30).toFixed(2)}
+              {total.toFixed(2)}
               <span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
                   <path
@@ -130,7 +177,11 @@ function Cart() {
                 </svg>
               </span>
             </p>
-            <button type="button" className="proceed-btn">
+            <button
+              type="button"
+              className="proceed-btn"
+              onClick={() => navigate('/placeorders')}
+            >
               PROCEED TO CHECKOUT
             </button>
             <p className="order-bottom">
@@ -142,5 +193,27 @@ function Cart() {
     </main>
   );
 }
+
+const emptyCartStyles = {
+  container: {
+    textAlign: 'center',
+    padding: '60px 20px',
+  },
+  icon: {
+    fontSize: '80px',
+    marginBottom: '20px',
+  },
+  button: {
+    marginTop: '20px',
+    padding: '12px 32px',
+    backgroundColor: '#ffa17c',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '16px',
+    fontWeight: '500',
+    cursor: 'pointer',
+  },
+};
 
 export default Cart;

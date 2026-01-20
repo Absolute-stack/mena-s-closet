@@ -370,6 +370,9 @@
 /* ===============================
    DESKTOP (≥1024px)
 ================================ */
+/* ===============================
+   DESKTOP (≥1024px)
+================================ */
 @media (min-width: 1024px) {
   .product-wrapper {
     padding: 2rem;
@@ -385,10 +388,12 @@
   .wrapper {
     flex: 1;
     max-width: 600px;
+    min-width: 0; /* FIX: critical for flex children */
   }
 
   .product-img-wrapper {
     border-radius: 1.5rem;
+    width: 100%; /* FIX: ensure it takes full width */
   }
 
   .product-strip {
