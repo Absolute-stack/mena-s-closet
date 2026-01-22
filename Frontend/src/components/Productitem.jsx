@@ -5,8 +5,15 @@ import './Productitem.css';
 
 function Productitem({ id, name, images, price, alt }) {
   const { currency } = useContext(ShopContext);
+  const preloadProduct = () => import('../pages/Product');
+
   return (
-    <Link to={`/product/${id}`} className="product-item">
+    <Link
+      to={`/product/${id}`}
+      onMouseEnter={preloadProduct}
+      onTouchStart={preloadProduct}
+      className="product-item"
+    >
       <div className="product-img-container">
         <img src={images?.[0]} alt={alt} loading="lazy" decoding="async" />
       </div>

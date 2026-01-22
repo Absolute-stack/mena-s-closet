@@ -3,108 +3,115 @@ import mongoose from 'mongoose';
 const orderSchema = new mongoose.Schema(
   {
     userId: {
-      type: String,
-      required: true,
-      index: true, // ⚡ fast user order lookup
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'user',
+      required: false, // Allow null for guest orders
+      default: null,
+      index: true,
     },
 
     items: [
       {
-        productId: { type: String, required: true },
-        name: String,
-        price: Number,
-        size: String,
-        qty: { type: Number, default: 1 },
-        image: String,
+        productId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'product',
+          required: true,
+        },
+        name: { type: String, required: true },
+        price: { type: Number, required: true, min: 0 },
+        quantity: { type: Number, required: true, min: 1 },
+        size: { type: String, required: true },
+        image: { type: String, required: true },
       },
     ],
 
-    amount: {
-      type: Number,
-      required: true,
-      min: 0,
-      index: true,
-    },
-
-    address: {
-      fullName: { type: String, required: true },
-      phone: { type: String, required: true },
-      region: { type: String, required: true },
-      digitalAddress: { type: String, required: true },
-      landmark: String,
-      directions: String,
-    },
-
-    status: {
-      type: String,
-      enum: ['Processing', 'Paid', 'Shipped', 'Delivered', 'Cancelled'],
-      default: 'Processing',
-      index: true,
+    shippingAddress: {
+      firstName: { type: String, required: true, trim: true },
+      lastName: { type: String, required: true, trim: true },
+      email: { type: String, required: true, trim: true },
+      street: { type: String, required: true, trim: true },
+      city: { type: String, required: true, trim: true },
+      state: { type: String, required: true, trim: true },
+      zipcode: { type: String, required: true, trim: true },
+      country: { type: String, required: true, trim: true },
+      phone: { type: String, required: true, trim: true },
     },
 
     paymentMethod: {
       type: String,
-      enum: ['paystack', 'cod'],
+      enum: ['COD', 'Stripe', 'Razorpay'],
+      default: 'COD',
       required: true,
-      lowercase: true,
     },
 
-    payment: {
-      type: Boolean,
-      default: false,
+    paymentStatus: {
+      type: String,
+      enum: ['Pending', 'Paid', 'Failed'],
+      default: 'Pending',
       index: true,
     },
 
-    transactionRef: {
-      type: String, // Paystack reference
+    orderStatus: {
+      type: String,
+      enum: [
+        'Order Placed',
+        'Packing',
+        'Shipped',
+        'Out for delivery',
+        'Delivered',
+      ],
+      default: 'Order Placed',
+      index: true,
+    },
+
+    subtotal: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+
+    deliveryFee: {
+      type: Number,
+      default: 10,
+      min: 0,
+    },
+
+    totalAmount: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+
+    paymentInfo: {
+      type: Object,
+      default: {},
+    },
+
+    date: {
+      type: Date,
+      default: Date.now,
       index: true,
     },
   },
   {
-    timestamps: true, // createdAt = order date
+    timestamps: true,
     versionKey: false,
   }
 );
 
-// ========================================
-// ⚡ SMART INDEXES
-// ========================================
+// Indexes for efficient queries
+orderSchema.index({ userId: 1, date: -1 });
+orderSchema.index({ orderStatus: 1, date: -1 });
+orderSchema.index({ paymentStatus: 1 });
 
-orderSchema.index({ userId: 1, createdAt: -1 });
-orderSchema.index({ status: 1, createdAt: -1 });
-orderSchema.index({ payment: 1, createdAt: -1 });
-
-// ========================================
-// ⚡ QUERY HELPERS
-// ========================================
-
-// User orders
-orderSchema.statics.getUserOrders = function (userId) {
-  return this.find({ userId }).sort({ createdAt: -1 }).lean();
-};
-
-// Admin - all orders
-orderSchema.statics.getAllOrders = function (filters = {}) {
-  const query = {};
-
-  if (filters.status) query.status = filters.status;
-  if (filters.payment !== undefined) query.payment = filters.payment;
-
-  return this.find(query)
-    .sort({ createdAt: -1 })
-    .limit(filters.limit || 20)
-    .skip(filters.skip || 0)
-    .lean();
-};
-
-// Mark paid
-orderSchema.statics.markAsPaid = function (ref) {
-  return this.findOneAndUpdate(
-    { transactionRef: ref },
-    { payment: true, status: 'Paid' },
-    { new: true }
-  );
-};
+// Calculate total before saving
+orderSchema.pre('save', function (next) {
+  if (!this.isModified('subtotal') && !this.isModified('deliveryFee')) {
+    return next();
+  }
+  this.totalAmount = this.subtotal + this.deliveryFee;
+  next();
+});
 
 const orderModel =
   mongoose.models.order || mongoose.model('order', orderSchema);

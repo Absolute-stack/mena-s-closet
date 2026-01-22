@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
-import { assests } from '../assets/assets';
 
+const PRELOAD_WOMEN = () => import('../pages/Women.jsx');
+const PRELOAD_MEN = () => import('../pages/Men.jsx');
+const PRELOAD_ACCESSORIES = () => import('../pages/Accessories.jsx');
 function ShopCategory() {
   return (
     <section className="shop-category">
@@ -12,19 +14,34 @@ function ShopCategory() {
           </div>
         </div>
         <div className="category-grid">
-          <Link to="/women" className="card">
+          <Link
+            to="/women"
+            onMouseEnter={PRELOAD_WOMEN}
+            onTouchStart={PRELOAD_WOMEN}
+            className="card"
+          >
             <img src="/dress_image.avif" alt="women's-fashion" loading="lazy" />
             <div className="card-content">
               <p>Women's Fashion</p>
             </div>
           </Link>
-          <Link to="/men" className="card">
+          <Link
+            to="/men"
+            onMouseEnter={PRELOAD_MEN}
+            onTouchStart={PRELOAD_MEN}
+            className="card"
+          >
             <img src="/mens_image.avif" alt="men's-fashion" loading="lazy" />
             <div className="card-content">
               <p>Men's Fashion</p>
             </div>
           </Link>
-          <Link to="/accessories" className="card">
+          <Link
+            to="/accessories"
+            onMouseEnter={PRELOAD_ACCESSORIES}
+            onTouchStart={PRELOAD_ACCESSORIES}
+            className="card"
+          >
             <img src="accessories.avif" alt="accessories" loading="lazy" />
             <div className="card-content">
               <p>Accessories</p>

@@ -3,6 +3,9 @@ import { assests } from '../assets/assets';
 import './Hero.css';
 
 function Hero() {
+  const preloadWomen = () => import('../pages/Women.jsx');
+  const preloadMen = () => import('../pages/Men.jsx');
+
   return (
     <section className="hero">
       <div className="container">
@@ -33,13 +36,21 @@ function Hero() {
             </p>
 
             <div className="btn-container">
-              <Link to="/women" className="hero-main-btn flex gap">
+              <Link
+                to="/women"
+                onMouseEnter={preloadWomen}
+                className="hero-main-btn flex gap"
+              >
                 <p>Shop</p>
                 <p>Women</p>
                 <img src={assests.right_arrow} alt="" />
               </Link>
 
-              <Link to="/men" className="hero-sec-btn flex gap">
+              <Link
+                to="/men"
+                onMouseEnter={preloadMen}
+                className="hero-sec-btn flex gap"
+              >
                 <p>Shop</p>
                 <p>Men</p>
                 <img src={assests.right_arrow} alt="" />

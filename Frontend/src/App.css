@@ -4,6 +4,7 @@
 ================================ */
 
 /* Base styles remain the same */
+
 li {
   list-style: none;
 }
@@ -54,6 +55,10 @@ select {
 
 ::-webkit-scrollbar-thumb {
   background: var(--main-clr);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 /* ===============================

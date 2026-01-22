@@ -6,7 +6,7 @@ import {
   verifyUser,
   userLogout,
   getUserData,
-} from '../controllers/usersController.js';
+} from '../controllers/userController.js';
 import loginLimiter from '../middleware/limiter.js';
 const userRouter = express.Router();
 

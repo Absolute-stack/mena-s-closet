@@ -79,7 +79,7 @@ const productSchema = new mongoose.Schema(
     versionKey: false,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  }
+  },
 );
 
 // ========================================
@@ -155,15 +155,11 @@ productSchema.statics.searchProducts = function (term, limit = 20) {
 // ⚡ PRE SAVE CLEANUP
 // ========================================
 
-productSchema.pre('save', function (next) {
+productSchema.pre('save', function () {
   if (this.category) this.category = this.category.toLowerCase().trim();
-
   if (this.subCategory)
     this.subCategory = this.subCategory.toLowerCase().trim();
-
   if (this.gender) this.gender = this.gender.toLowerCase().trim();
-
-  next();
 });
 
 const productModel =
