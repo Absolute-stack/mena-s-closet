@@ -18,7 +18,7 @@ function ProductGrid({ products }) {
   }, [products, visibleCount]);
 
   function loadMore() {
-    setVisibleCount((prevCount) => prevCount + 15);
+    setVisibleCount((prevCount) => prevCount + ITEMS_PER_LOAD);
   }
 
   if (!products || products.length === 0) {

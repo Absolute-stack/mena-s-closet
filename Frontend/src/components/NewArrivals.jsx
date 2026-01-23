@@ -1,4 +1,4 @@
-import { useContext, useMemo } from 'react';
+import { useContext } from 'react';
 import { ShopContext } from './ShopContext';
 import Productitem from './Productitem';
 import './NewArrivals.css';
@@ -6,11 +6,11 @@ import './NewArrivals.css';
 function NewArrivals() {
   const { products } = useContext(ShopContext);
 
-  const newArrivals = products.slice(0, 3);
-
-  if (!products || products.length === 0) {
+  if (!products) {
     return <div>Loading....</div>;
   }
+
+  const newArrivals = products?.slice(0, 3);
 
   return (
     <section className="newarrivals">
