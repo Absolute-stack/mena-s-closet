@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import PageNav from '../components/PageNav';
 import HeroImage from '../components/HeroImage';
 import FilterWomen from '../components/FilterWomen';

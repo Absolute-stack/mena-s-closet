@@ -6,8 +6,6 @@ import './NewArrivals.css';
 function NewArrivals() {
   const { products } = useContext(ShopContext);
 
-  const preloadProduct = () => import('../pages/Product.jsx');
-
   const newArrivals = products.slice(0, 3);
 
   if (!products || products.length === 0) {
@@ -34,7 +32,6 @@ function NewArrivals() {
                   images={product.images}
                   price={product.price}
                   alt={product.alt}
-                  onMouseEnter={preloadProduct}
                 />
               );
             })}
