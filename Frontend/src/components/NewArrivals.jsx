@@ -6,11 +6,9 @@ import './NewArrivals.css';
 function NewArrivals() {
   const { products } = useContext(ShopContext);
 
-  const preloadProduct = () => import('../pages/Product');
+  const preloadProduct = () => import('../pages/Product.jsx');
 
-  const newArrivals = useMemo(() => {
-    return products.slice(0, 3);
-  }, [products]);
+  const newArrivals = products.slice(0, 3);
 
   if (!products || products.length === 0) {
     return <div>Loading....</div>;
