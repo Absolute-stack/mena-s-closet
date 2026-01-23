@@ -3,10 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <!-- Title -->
     <title>
       Mena's Closet Ghana | Shop Women's & Men's Fashion Online | Fast Delivery
     </title>
+
     <!-- Primary Meta Tags -->
     <meta
       name="title"
@@ -16,51 +18,94 @@
       name="description"
       content="Shop quality fashion at Mena's Closet Ghana. Women's & men's clothing, accessories, traditional wear. Pay with Mobile Money or Cash on Delivery. Same-day delivery in Accra. Easy 7-day returns. Order now!"
     />
-    <!-- favicon -->
+
+    <!-- Favicon -->
     <link
       rel="shortcut icon"
       href="./src/assets/images/logo.webp"
       type="image/x-icon"
     />
 
-    <!-- Preload  -->
-    <link rel="preload" href="/hero.avif" as="image" type="image/avif" />
-    <link rel="dns-prefetch" href="https://checkout.paystack.com" crossorigin />
+    <!-- DNS Prefetch & Preconnect (early as possible) -->
+    <link rel="dns-prefetch" href="https://checkout.paystack.com" />
     <link rel="preconnect" href="https://checkout.paystack.com" crossorigin />
+
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="/hero.avif" as="image" type="image/avif" />
     <link
-      rel="Preload"
+      rel="preload"
       href="./src/assets/fonts/inter-v20-latin-regular.woff2"
       as="font"
       type="font/woff2"
+      crossorigin
     />
-    <!-- Critical Css Styles -->
+    <link
+      rel="preload"
+      href="./src/assets/fonts/inter-v20-latin-500.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="./src/assets/fonts/inter-v20-latin-700.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <!-- Preload Critical CSS (if you can inline it, even better) -->
+    <link rel="preload" href="/assets/index-OA8EIKki.css" as="style" />
+    <link rel="preload" href="/assets/react-ven_.css" as="style" />
+
+    <!-- Load CSS with media="print" then switch to "all" (prevents render blocking) -->
+    <link
+      rel="stylesheet"
+      href="/assets/index-OA8EIKki.css"
+      media="print"
+      onload="this.media = 'all'"
+    />
+    <link
+      rel="stylesheet"
+      href="/assets/react-ven_.css"
+      media="print"
+      onload="this.media = 'all'"
+    />
+
+    <!-- Fallback for no-JS -->
+    <noscript>
+      <link rel="stylesheet" href="/assets/index-OA8EIKki.css" />
+      <link rel="stylesheet" href="/assets/react-ven_.css" />
+    </noscript>
+
+    <!-- Critical Inline CSS -->
     <style>
       /* inter-regular - latin */
       @font-face {
-        font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+        font-display: swap;
         font-family: 'Inter';
         font-style: normal;
         font-weight: 400;
         src: url('./src/assets/fonts/inter-v20-latin-regular.woff2')
-          format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+          format('woff2');
       }
 
       /* inter-500 - latin */
       @font-face {
-        font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+        font-display: swap;
         font-family: 'Inter';
         font-style: normal;
         font-weight: 500;
-        src: url('./src/assets/fonts/inter-v20-latin-500.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+        src: url('./src/assets/fonts/inter-v20-latin-500.woff2') format('woff2');
       }
 
       /* inter-700 - latin */
       @font-face {
-        font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+        font-display: swap;
         font-family: 'Inter';
         font-style: normal;
         font-weight: 700;
-        src: url('./src/assets/fonts/inter-v20-latin-700.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+        src: url('./src/assets/fonts/inter-v20-latin-700.woff2') format('woff2');
       }
 
       :root {
@@ -69,7 +114,6 @@
         --accent-clr: lightgrey;
         --tag-clr: rgba(255, 255, 105, 0.489);
         --tag-clr2: rgba(255, 255, 105);
-
         --bg-clr: rgb(234, 234, 234);
         --main-ff: 'Inter', sans-serif;
       }
@@ -150,6 +194,12 @@
         background-color: var(--sec-clr);
       }
     </style>
+
+    <!-- Defer Paystack - load async after page render -->
+    <script src="https://checkout.paystack.com/v1/inline.js" async></script>
+
+    <!-- Defer vercel analytics -->
+    <script src="vercel.app" defer></script>
   </head>
   <body>
     <div id="root"></div>
