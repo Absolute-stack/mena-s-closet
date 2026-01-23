@@ -26,12 +26,18 @@
       type="image/x-icon"
     />
 
-    <!-- DNS Prefetch & Preconnect (early as possible) -->
-    <link rel="dns-prefetch" href="https://checkout.paystack.com" />
-    <link rel="preconnect" href="https://checkout.paystack.com" crossorigin />
+    <!-- DNS Prefetch & Preconnect -->
+    <link rel="dns-prefetch" href="https://js.paystack.co" />
+    <link rel="preconnect" href="https://js.paystack.co" crossorigin />
 
     <!-- Preload Critical Resources -->
-    <link rel="preload" href="/hero.avif" as="image" type="image/avif" />
+    <link
+      rel="preload"
+      href="/hero.avif"
+      as="image"
+      type="image/avif"
+      fetchpriority="high"
+    />
     <link
       rel="preload"
       href="./src/assets/fonts/inter-v20-latin-regular.woff2"
@@ -53,30 +59,6 @@
       type="font/woff2"
       crossorigin
     />
-
-    <!-- Preload Critical CSS (if you can inline it, even better) -->
-    <link rel="preload" href="/assets/index-OA8EIKki.css" as="style" />
-    <link rel="preload" href="/assets/react-ven_.css" as="style" />
-
-    <!-- Load CSS with media="print" then switch to "all" (prevents render blocking) -->
-    <link
-      rel="stylesheet"
-      href="/assets/index-OA8EIKki.css"
-      media="print"
-      onload="this.media = 'all'"
-    />
-    <link
-      rel="stylesheet"
-      href="/assets/react-ven_.css"
-      media="print"
-      onload="this.media = 'all'"
-    />
-
-    <!-- Fallback for no-JS -->
-    <noscript>
-      <link rel="stylesheet" href="/assets/index-OA8EIKki.css" />
-      <link rel="stylesheet" href="/assets/react-ven_.css" />
-    </noscript>
 
     <!-- Critical Inline CSS -->
     <style>
@@ -124,6 +106,10 @@
         margin: 0;
         padding: 0;
         box-sizing: border-box;
+      }
+
+      body {
+        font-family: var(--main-ff);
       }
 
       .hero {
@@ -189,21 +175,47 @@
 
       .nav {
         padding-block: 0.8rem;
-        width: 1535px;
+        max-width: 1535px;
+        margin: 0 auto;
         border-block-end: 1px solid lightgray;
         background-color: var(--sec-clr);
       }
     </style>
 
-    <!-- Defer Paystack - load async after page render -->
-    <script src="https://checkout.paystack.com/v1/inline.js" async></script>
+    <!-- Load non-critical CSS asynchronously -->
+    <link
+      rel="preload"
+      href="/assets/index-OA8EIKki.css"
+      as="style"
+      onload="
+        this.onload = null;
+        this.rel = 'stylesheet';
+      "
+    />
+    <link
+      rel="preload"
+      href="/assets/react-ven_.css"
+      as="style"
+      onload="
+        this.onload = null;
+        this.rel = 'stylesheet';
+      "
+    />
 
-    <!-- Defer vercel analytics -->
-    <script src="vercel.app" defer></script>
+    <!-- Fallback for browsers without JS -->
+    <noscript>
+      <link rel="stylesheet" href="/assets/index-OA8EIKki.css" />
+      <link rel="stylesheet" href="/assets/react-ven_.css" />
+    </noscript>
+
+    <!-- Module Preload for main.jsx (if using Vite) -->
+    <link rel="modulepreload" href="/src/main.jsx" />
   </head>
   <body>
     <div id="root"></div>
-    <script src="https://js.paystack.co/v1/inline.js"></script>
+
+    <!-- Scripts at bottom for better performance -->
     <script type="module" src="/src/main.jsx"></script>
+    <script src="https://js.paystack.co/v1/inline.js" async></script>
   </body>
 </html>
