@@ -6,7 +6,7 @@ function ProductGrid({ products }) {
   if (!Array.isArray(products)) {
     throw new Error('products must be an array');
   }
-  const ITEMS_PER_LOAD = 9;
+  const ITEMS_PER_LOAD = 30;
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_LOAD);
 
   useEffect(() => {
@@ -18,7 +18,7 @@ function ProductGrid({ products }) {
   }, [products, visibleCount]);
 
   function loadMore() {
-    setVisibleCount((prevCount) => prevCount + 3);
+    setVisibleCount((prevCount) => prevCount + 15);
   }
 
   if (!products || products.length === 0) {
