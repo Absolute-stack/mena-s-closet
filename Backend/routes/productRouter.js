@@ -5,7 +5,7 @@ import {
   removeProduct,
   listProducts,
   singleProduct,
-} from '../controllers/ProductController.js';
+} from '../controllers/productController.js';
 import upload from '../middleware/multer.js';
 
 const router = express.Router();
