@@ -20,7 +20,7 @@ function Product() {
     target((prevValue) => !prevValue);
   }
 
-  const product = products.filter((p) => p.id === id)[0];
+  const product = products?.find((p) => String(p.id) === String(id));
 
   if (!products)
     return <div>Something Went Wrong Fetching Data For Product.</div>;
@@ -49,15 +49,12 @@ function Product() {
   }, [product, products]);
 
   useEffect(() => {
-    // Scroll to top when product changes
-    window.scrollTo(0, 0);
+    if (!product) return;
 
-    // Reset all product-specific state
-    if (product?.images?.[0]) {
-      setImage(product.images[0]);
-    }
-    setS(''); // Reset size selection
-  }, [id, product?.images]); // Dependencies: id and images array
+    window.scrollTo(0, 0);
+    setImage(product.images[0]);
+    setS('');
+  }, [product]);
 
   const isAccessory =
     product.accessories === true ? 'Accessories' : `${product.gender}`;

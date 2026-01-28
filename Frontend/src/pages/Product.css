@@ -20,7 +20,7 @@
 
 .product-img-wrapper {
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 3 / 4;
   height: 600px;
   border-radius: 1rem;
   overflow: hidden;
