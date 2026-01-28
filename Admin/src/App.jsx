@@ -1,30 +1,17 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import './Admin.css';
 
-/* =========================
-   AXIOS INSTANCE (INLINE)
-========================= */
-const api = axios.create({
-  baseURL: `${import.meta.env.VITE_BACKEND_URL}/api`,
-  withCredentials: true,
-});
+const API_URL = `${import.meta.env.VITE_BACKEND_URL}/api`;
 
-/* =========================
-   ADMIN DASHBOARD
-========================= */
 export default function AdminDashboard() {
   const [token, setToken] = useState(localStorage.getItem('adminToken') || '');
   const [activeTab, setActiveTab] = useState('products');
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
   const [editingProduct, setEditingProduct] = useState(null);
-
   const [productForm, setProductForm] = useState({
     name: '',
     desc: '',
@@ -37,7 +24,6 @@ export default function AdminDashboard() {
     sizes: [],
     stock: '',
   });
-
   const [images, setImages] = useState({
     image1: null,
     image2: null,
@@ -45,9 +31,6 @@ export default function AdminDashboard() {
     image4: null,
   });
 
-  /* =========================
-     EFFECTS
-  ========================= */
   useEffect(() => {
     if (token) {
       fetchProducts();
@@ -55,71 +38,78 @@ export default function AdminDashboard() {
     }
   }, [token]);
 
-  /* =========================
-     AUTH
-  ========================= */
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const { data } = await api.post('/user/admin', { email, password });
-
+      const response = await fetch(`${API_URL}/user/admin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
       if (data.success) {
-        localStorage.setItem('adminToken', 'admin-logged-in');
         setToken('admin-logged-in');
+        localStorage.setItem('adminToken', 'admin-logged-in');
         alert('Login successful!');
       } else {
         alert(data.message);
       }
-    } catch (err) {
-      alert(err.response?.data?.message || 'Login failed');
+    } catch (error) {
+      alert('Login failed');
     }
     setLoading(false);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('adminToken');
     setToken('');
+    localStorage.removeItem('adminToken');
   };
 
-  /* =========================
-     FETCH DATA
-  ========================= */
   const fetchProducts = async () => {
     try {
-      const { data } = await api.get('/product/list');
+      const response = await fetch(`${API_URL}/product/list`);
+      const data = await response.json();
       if (data.success) setProducts(data.products);
-    } catch {
+    } catch (error) {
       alert('Failed to fetch products');
     }
   };
 
   const fetchOrders = async () => {
     try {
-      const { data } = await api.get('/order/list');
+      const response = await fetch(`${API_URL}/order/list`, {
+        credentials: 'include',
+      });
+      const data = await response.json();
       if (data.success) setOrders(data.orders);
-    } catch {
+    } catch (error) {
       alert('Failed to fetch orders');
     }
   };
 
-  /* =========================
-     PRODUCTS
-  ========================= */
   const handleAddProduct = async () => {
     setLoading(true);
     try {
       const formData = new FormData();
-
-      Object.entries(productForm).forEach(([key, value]) => {
-        formData.append(key, key === 'sizes' ? JSON.stringify(value) : value);
+      Object.keys(productForm).forEach((key) => {
+        if (key === 'sizes') {
+          formData.append(key, JSON.stringify(productForm[key]));
+        } else {
+          formData.append(key, productForm[key]);
+        }
       });
 
-      Object.entries(images).forEach(([key, file]) => {
-        if (file) formData.append(key, file);
+      Object.keys(images).forEach((key) => {
+        if (images[key]) formData.append(key, images[key]);
       });
 
-      const { data } = await api.post('/product/add', formData);
-
+      const response = await fetch(`${API_URL}/product/add`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+      const data = await response.json();
       if (data.success) {
         alert('Product added!');
         fetchProducts();
@@ -127,7 +117,7 @@ export default function AdminDashboard() {
       } else {
         alert(data.message);
       }
-    } catch {
+    } catch (error) {
       alert('Failed to add product');
     }
     setLoading(false);
@@ -136,23 +126,30 @@ export default function AdminDashboard() {
   const handleUpdateProduct = async () => {
     if (!editingProduct) return;
     setLoading(true);
-
     try {
       const formData = new FormData();
       formData.append('id', editingProduct._id);
 
-      Object.entries(productForm).forEach(([key, value]) => {
-        formData.append(key, key === 'sizes' ? JSON.stringify(value) : value);
+      Object.keys(productForm).forEach((key) => {
+        if (key === 'sizes') {
+          formData.append(key, JSON.stringify(productForm[key]));
+        } else {
+          formData.append(key, productForm[key]);
+        }
       });
 
-      Object.entries(images).forEach(([key, file]) => {
-        if (file) formData.append(key, file);
+      Object.keys(images).forEach((key) => {
+        if (images[key]) formData.append(key, images[key]);
       });
 
-      const { data } = await api.post('/product/update', formData);
-
+      const response = await fetch(`${API_URL}/product/update`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+      const data = await response.json();
       if (data.success) {
-        alert('Product updated!');
+        alert('Product updated successfully!');
         fetchProducts();
         resetForm();
         setEditingProduct(null);
@@ -160,10 +157,9 @@ export default function AdminDashboard() {
       } else {
         alert(data.message);
       }
-    } catch {
+    } catch (error) {
       alert('Failed to update product');
     }
-
     setLoading(false);
   };
 
@@ -181,42 +177,52 @@ export default function AdminDashboard() {
       sizes: product.sizes,
       stock: product.stock,
     });
-    setImages({ image1: null, image2: null, image3: null, image4: null });
+    setImages({
+      image1: null,
+      image2: null,
+      image3: null,
+      image4: null,
+    });
     setActiveTab('add-product');
   };
 
   const handleDeleteProduct = async (id) => {
     if (!confirm('Delete this product?')) return;
-
     try {
-      const { data } = await api.post('/product/remove', { id });
+      const response = await fetch(`${API_URL}/product/remove`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ id }),
+      });
+      const data = await response.json();
       if (data.success) {
         alert('Product deleted');
         fetchProducts();
       }
-    } catch {
+    } catch (error) {
       alert('Failed to delete');
     }
   };
 
-  /* =========================
-     ORDERS
-  ========================= */
   const handleUpdateOrderStatus = async (orderId, status) => {
     try {
-      const { data } = await api.post('/order/status', { orderId, status });
+      const response = await fetch(`${API_URL}/order/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ orderId, status }),
+      });
+      const data = await response.json();
       if (data.success) {
         alert('Status updated');
         fetchOrders();
       }
-    } catch {
+    } catch (error) {
       alert('Failed to update');
     }
   };
 
-  /* =========================
-     HELPERS
-  ========================= */
   const toggleSize = (size) => {
     setProductForm((prev) => ({
       ...prev,
@@ -243,104 +249,384 @@ export default function AdminDashboard() {
     setEditingProduct(null);
   };
 
-  /* =========================
-     LOGIN PAGE
-  ========================= */
+  const cancelEdit = () => {
+    resetForm();
+    setEditingProduct(null);
+  };
+
+  // LOGIN PAGE
   if (!token) {
     return (
       <div className="login-container">
         <div className="login-card">
-          <h1>Admin Login</h1>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button onClick={handleLogin} disabled={loading}>
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
+          <h1 className="login-title">Admin Login</h1>
+          <div className="login-form">
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="login-input"
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="login-input"
+            />
+            <button
+              onClick={handleLogin}
+              disabled={loading}
+              className="login-button"
+            >
+              {loading ? 'Logging in...' : 'Login'}
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
-  /* =========================
-     DASHBOARD UI
-  ========================= */
+  // MAIN DASHBOARD
   return (
     <div>
-      <header className="admin-header">
-        <h1>Mena's Closet – Admin</h1>
-        <button onClick={handleLogout}>Logout</button>
-      </header>
-
-      <div className="tabs-container">
-        {['products', 'add-product', 'orders'].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={activeTab === tab ? 'active' : ''}
-          >
-            {tab.replace('-', ' ')}
+      {/* Header */}
+      <div className="admin-header">
+        <div className="header-content">
+          <h1 className="header-title">Mena's Closet - Admin</h1>
+          <button onClick={handleLogout} className="logout-button">
+            Logout
           </button>
-        ))}
+        </div>
       </div>
 
-      {/* PRODUCTS */}
-      {activeTab === 'products' && (
-        <div>
-          {products.map((p) => (
-            <div key={p._id}>
-              <img src={p.images[0]} width={50} />
-              {p.name} – GH₵{p.price}
-              <button onClick={() => handleEditProduct(p)}>Edit</button>
-              <button onClick={() => handleDeleteProduct(p._id)}>Delete</button>
-            </div>
+      {/* Main Content */}
+      <div className="admin-main">
+        {/* Tabs */}
+        <div className="tabs-container">
+          {['products', 'add-product', 'orders'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`tab-button ${activeTab === tab ? 'active' : ''}`}
+            >
+              {tab.replace('-', ' ')}
+            </button>
           ))}
         </div>
-      )}
 
-      {/* ADD / EDIT PRODUCT */}
-      {activeTab === 'add-product' && (
-        <button
-          onClick={editingProduct ? handleUpdateProduct : handleAddProduct}
-          disabled={loading}
-        >
-          {loading
-            ? 'Saving...'
-            : editingProduct
-              ? 'Update Product'
-              : 'Add Product'}
-        </button>
-      )}
+        {/* Products List */}
+        {activeTab === 'products' && (
+          <div className="content-card">
+            <h2 className="card-title">Products ({products.length})</h2>
+            <div className="table-wrapper">
+              <table className="products-table">
+                <thead>
+                  <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {products.map((product) => (
+                    <tr key={product._id}>
+                      <td>
+                        <img
+                          src={product.images[0]}
+                          alt=""
+                          className="product-image"
+                        />
+                      </td>
+                      <td>{product.name}</td>
+                      <td>{product.category}</td>
+                      <td>GH₵{product.price}</td>
+                      <td>{product.stock}</td>
+                      <td>
+                        <button
+                          onClick={() => handleEditProduct(product)}
+                          className="edit-button"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProduct(product._id)}
+                          className="delete-button"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
-      {/* ORDERS */}
-      {activeTab === 'orders' && (
-        <div>
-          {orders.map((o) => (
-            <div key={o._id}>
-              Order #{o._id.slice(-6)} – GH₵{o.totalAmount}
-              <select
-                value={o.orderStatus}
-                onChange={(e) => handleUpdateOrderStatus(o._id, e.target.value)}
+        {/* Add/Edit Product Form */}
+        {activeTab === 'add-product' && (
+          <div className="content-card">
+            <h2 className="card-title">
+              {editingProduct ? 'Edit Product' : 'Add New Product'}
+            </h2>
+
+            {editingProduct && (
+              <div className="edit-notice">
+                <p>
+                  Editing: <strong>{editingProduct.name}</strong>
+                </p>
+                <button onClick={cancelEdit} className="cancel-edit-button">
+                  Cancel Edit
+                </button>
+              </div>
+            )}
+
+            <div className="form-container">
+              <div className="form-row">
+                <input
+                  type="text"
+                  placeholder="Product Name"
+                  value={productForm.name}
+                  onChange={(e) =>
+                    setProductForm({ ...productForm, name: e.target.value })
+                  }
+                  className="form-input"
+                />
+                <input
+                  type="number"
+                  placeholder="Price"
+                  value={productForm.price}
+                  onChange={(e) =>
+                    setProductForm({ ...productForm, price: e.target.value })
+                  }
+                  className="form-input"
+                />
+              </div>
+
+              <textarea
+                placeholder="Description"
+                value={productForm.desc}
+                onChange={(e) =>
+                  setProductForm({ ...productForm, desc: e.target.value })
+                }
+                className="form-textarea"
+              />
+
+              <div className="form-row">
+                <input
+                  type="text"
+                  placeholder="Category"
+                  value={productForm.category}
+                  onChange={(e) =>
+                    setProductForm({ ...productForm, category: e.target.value })
+                  }
+                  className="form-input"
+                />
+                <input
+                  type="text"
+                  placeholder="Sub Category"
+                  value={productForm.subCategory}
+                  onChange={(e) =>
+                    setProductForm({
+                      ...productForm,
+                      subCategory: e.target.value,
+                    })
+                  }
+                  className="form-input"
+                />
+                <input
+                  type="number"
+                  placeholder="Stock"
+                  value={productForm.stock}
+                  onChange={(e) =>
+                    setProductForm({ ...productForm, stock: e.target.value })
+                  }
+                  className="form-input"
+                />
+              </div>
+
+              <div>
+                <label className="form-label">Gender</label>
+                <select
+                  value={productForm.gender}
+                  onChange={(e) =>
+                    setProductForm({ ...productForm, gender: e.target.value })
+                  }
+                  className="form-select"
+                >
+                  <option value="men">Men</option>
+                  <option value="women">Women</option>
+                  <option value="unisex">Unisex</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="form-label">Sizes</label>
+                <div className="size-selector">
+                  {['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'].map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => toggleSize(size)}
+                      className={`size-button ${
+                        productForm.sizes.includes(size) ? 'selected' : ''
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="checkbox-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={productForm.bestseller}
+                    onChange={(e) =>
+                      setProductForm({
+                        ...productForm,
+                        bestseller: e.target.checked,
+                      })
+                    }
+                    className="checkbox-input"
+                  />
+                  Bestseller
+                </label>
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={productForm.accessories}
+                    onChange={(e) =>
+                      setProductForm({
+                        ...productForm,
+                        accessories: e.target.checked,
+                      })
+                    }
+                    className="checkbox-input"
+                  />
+                  Accessories
+                </label>
+              </div>
+
+              <div>
+                <label className="form-label">
+                  {editingProduct
+                    ? 'Images (Upload new images to add/replace - existing images will be kept)'
+                    : 'Images (4 max)'}
+                </label>
+                {editingProduct && editingProduct.images.length > 0 && (
+                  <div className="existing-images">
+                    <p className="existing-images-title">Current images:</p>
+                    <div className="existing-images-grid">
+                      {editingProduct.images.map((img, idx) => (
+                        <img
+                          key={idx}
+                          src={img}
+                          alt={`Product ${idx + 1}`}
+                          className="existing-image-preview"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="file-grid">
+                  {['image1', 'image2', 'image3', 'image4'].map((key) => (
+                    <input
+                      key={key}
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) =>
+                        setImages({ ...images, [key]: e.target.files[0] })
+                      }
+                      className="file-input"
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <button
+                onClick={
+                  editingProduct ? handleUpdateProduct : handleAddProduct
+                }
+                disabled={loading}
+                className="submit-button"
               >
-                <option>Order Placed</option>
-                <option>Packing</option>
-                <option>Shipped</option>
-                <option>Out for delivery</option>
-                <option>Delivered</option>
-              </select>
+                {loading
+                  ? editingProduct
+                    ? 'Updating...'
+                    : 'Adding...'
+                  : editingProduct
+                    ? 'Update Product'
+                    : 'Add Product'}
+              </button>
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        )}
+
+        {/* Orders */}
+        {activeTab === 'orders' && (
+          <div className="content-card">
+            <h2 className="card-title">Orders ({orders.length})</h2>
+            <div className="orders-container">
+              {orders.map((order) => (
+                <div key={order._id} className="order-card">
+                  <div className="order-header">
+                    <div>
+                      <p className="order-id">Order #{order._id.slice(-6)}</p>
+                      <p className="order-customer">
+                        {order.userId?.name || 'Guest Customer'} -{' '}
+                        {order.userId?.email || order.shippingAddress.email}
+                      </p>
+                      <p className="order-date">
+                        {new Date(order.date).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <p className="order-total">GH₵{order.totalAmount}</p>
+                  </div>
+
+                  <div className="order-items">
+                    <p className="items-title">Items:</p>
+                    {order.items.map((item, idx) => (
+                      <p key={idx} className="order-item">
+                        {item.name} x{item.quantity} ({item.size})
+                      </p>
+                    ))}
+                  </div>
+
+                  <div className="order-footer">
+                    <select
+                      value={order.orderStatus}
+                      onChange={(e) =>
+                        handleUpdateOrderStatus(order._id, e.target.value)
+                      }
+                      className="status-select"
+                    >
+                      <option value="Order Placed">Order Placed</option>
+                      <option value="Packing">Packing</option>
+                      <option value="Shipped">Shipped</option>
+                      <option value="Out for delivery">Out for delivery</option>
+                      <option value="Delivered">Delivered</option>
+                    </select>
+                    <span
+                      className={`payment-badge ${
+                        order.paymentStatus === 'Paid' ? 'paid' : 'pending'
+                      }`}
+                    >
+                      {order.paymentStatus}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
