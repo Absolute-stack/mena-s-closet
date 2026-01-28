@@ -14,7 +14,6 @@ function Product() {
   const [s, setS] = useState('');
   const [image, setImage] = useState(''); // Initialize as empty string
   const [relatedProducts, setRelatedProducts] = useState([]);
-  const navigate = useNavigate();
 
   function handleClick(target) {
     target((prevValue) => !prevValue);
