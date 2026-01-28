@@ -4,6 +4,17 @@ import productModel from '../models/productModel.js';
 // Add Product (Admin)
 async function addProduct(req, res) {
   try {
+    console.log('🔥 ADD PRODUCT CALLED');
+
+    // Check if Cloudinary is configured
+    if (!cloudinary.config().cloud_name) {
+      console.error('❌ Cloudinary not configured!');
+      return res.status(500).json({
+        success: false,
+        message: 'Server configuration error',
+      });
+    }
+
     const {
       name,
       desc,
@@ -17,8 +28,11 @@ async function addProduct(req, res) {
       stock,
     } = req.body;
 
+    console.log('📦 Received data:', { name, price, category });
+
     // Validate required fields
     if (!name || !desc || !price || !category || !gender || !sizes) {
+      console.log('❌ Validation failed');
       return res.status(400).json({
         success: false,
         message: 'All required fields must be provided',
@@ -34,6 +48,8 @@ async function addProduct(req, res) {
       (item) => item !== undefined,
     );
 
+    console.log('📸 Images received:', images.length);
+
     if (images.length === 0) {
       return res.status(400).json({
         success: false,
@@ -41,19 +57,38 @@ async function addProduct(req, res) {
       });
     }
 
-    // Upload images to Cloudinary
+    // Upload images to Cloudinary with detailed error handling
+    console.log('☁️ Starting Cloudinary upload...');
     const imageUrls = await Promise.all(
-      images.map(async (item) => {
-        const result = await cloudinary.uploader.upload(item.path, {
-          resource_type: 'image',
-          folder: 'products',
-        });
-        return result.secure_url;
+      images.map(async (item, index) => {
+        try {
+          console.log(`Uploading image ${index + 1}: ${item.path}`);
+          const result = await cloudinary.uploader.upload(item.path, {
+            resource_type: 'image',
+            folder: 'products',
+          });
+          console.log(`✅ Image ${index + 1} uploaded: ${result.secure_url}`);
+          return result.secure_url;
+        } catch (uploadError) {
+          console.error(`❌ Failed to upload image ${index + 1}:`, uploadError);
+          throw new Error(`Image upload failed: ${uploadError.message}`);
+        }
       }),
     );
 
+    console.log('✅ All images uploaded');
+
     // Parse sizes if it's a JSON string
-    const parsedSizes = typeof sizes === 'string' ? JSON.parse(sizes) : sizes;
+    let parsedSizes;
+    try {
+      parsedSizes = typeof sizes === 'string' ? JSON.parse(sizes) : sizes;
+    } catch (parseError) {
+      console.error('❌ Failed to parse sizes:', parseError);
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid sizes format',
+      });
+    }
 
     // Create product
     const productData = {
@@ -70,8 +105,10 @@ async function addProduct(req, res) {
       stock: Number(stock) || 0,
     };
 
+    console.log('💾 Saving product to database...');
     const product = new productModel(productData);
     await product.save();
+    console.log('✅ Product saved successfully');
 
     res.status(201).json({
       success: true,
@@ -79,7 +116,11 @@ async function addProduct(req, res) {
       product,
     });
   } catch (error) {
-    console.error('Add product error:', error);
+    console.error('❌❌❌ ADD PRODUCT ERROR ❌❌❌');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+
     res.status(500).json({
       success: false,
       message: 'Failed to add product',
