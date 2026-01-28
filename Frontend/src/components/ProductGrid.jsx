@@ -35,7 +35,7 @@ function ProductGrid({ products }) {
             images={product.images}
             name={product.name}
             price={product.price}
-            alt={product.alt}
+            alt={product.name}
           />
         ))}
       </div>

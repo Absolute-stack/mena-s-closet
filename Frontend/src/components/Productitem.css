@@ -15,7 +15,7 @@
 /* IMAGE CONTAINER */
 .product-img-container {
   width: 100%;
-  height: 220px; /* FIXED HEIGHT */
+  height: 350px; /* FIXED HEIGHT */
   overflow: hidden;
 }
 

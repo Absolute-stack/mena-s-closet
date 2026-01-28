@@ -68,7 +68,7 @@ function ShopContextProvider({ children }) {
         toast.error('Failed to load products');
       }
     },
-    [backend]
+    [backend],
   );
 
   // base filtered data (using fetched products)
@@ -78,13 +78,13 @@ function ShopContextProvider({ children }) {
 
   const womenProducts = useMemo(() => {
     return allProducts.filter(
-      (product) => product.gender === 'women' && !product.accessories
+      (product) => product.gender === 'women' && !product.accessories,
     );
   }, [allProducts]);
 
   const menProducts = useMemo(() => {
     return allProducts.filter(
-      (product) => product.gender === 'men' && !product.accessories
+      (product) => product.gender === 'men' && !product.accessories,
     );
   }, [allProducts]);
 
@@ -108,7 +108,7 @@ function ShopContextProvider({ children }) {
     // SIZE FILTER
     if (sizes.length > 0) {
       filtered = filtered.filter((p) =>
-        p.sizes?.some((s) => sizes.includes(s))
+        p.sizes?.some((s) => sizes.includes(s)),
       );
     }
 
@@ -138,7 +138,7 @@ function ShopContextProvider({ children }) {
 
     if (sizes.length > 0) {
       filtered = filtered.filter((p) =>
-        p.sizes?.some((s) => sizes.includes(s))
+        p.sizes?.some((s) => sizes.includes(s)),
       );
     }
 
@@ -192,7 +192,7 @@ function ShopContextProvider({ children }) {
         return null;
       }
     },
-    [backend]
+    [backend],
   );
 
   // -------------------------
@@ -204,7 +204,7 @@ function ShopContextProvider({ children }) {
         const res = await axios.post(
           `${backend}/api/cart/get`,
           {},
-          { withCredentials: true }
+          { withCredentials: true },
         );
 
         if (res.data.success) {
@@ -215,7 +215,7 @@ function ShopContextProvider({ children }) {
         console.error('Failed to fetch cart:', error);
       }
     },
-    [backend, saveCartToLocalStorage]
+    [backend, saveCartToLocalStorage],
   );
 
   // -------------------------
@@ -227,7 +227,7 @@ function ShopContextProvider({ children }) {
         const res = await axios.post(
           `${backend}/api/cart/sync`,
           { guestCart },
-          { withCredentials: true }
+          { withCredentials: true },
         );
 
         if (res.data.success) {
@@ -238,7 +238,7 @@ function ShopContextProvider({ children }) {
         console.error('Failed to sync cart:', error);
       }
     },
-    [backend, saveCartToLocalStorage]
+    [backend, saveCartToLocalStorage],
   );
 
   // -------------------------
@@ -271,7 +271,7 @@ function ShopContextProvider({ children }) {
       .post(
         `${backend}/api/cart/add`,
         { itemId, size },
-        { withCredentials: true }
+        { withCredentials: true },
       )
       .then((res) => {
         if (res.data.success) {
@@ -316,7 +316,7 @@ function ShopContextProvider({ children }) {
       .post(
         `${backend}/api/cart/update`,
         { itemId, size, quantity },
-        { withCredentials: true }
+        { withCredentials: true },
       )
       .then((res) => {
         if (res.data.success) {
@@ -463,7 +463,7 @@ function ShopContextProvider({ children }) {
         }
       }
     },
-    [fetchUser, fetchCart, syncCart, loadCartFromLocalStorage]
+    [fetchUser, fetchCart, syncCart, loadCartFromLocalStorage],
   );
 
   const value = {

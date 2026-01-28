@@ -42,9 +42,9 @@ function Product() {
           (p) =>
             p.category === product.category &&
             p.gender === product.gender &&
-            p.id !== product.id
+            p.id !== product.id,
         )
-        .slice(0, 4)
+        .slice(0, 4),
     );
   }, [product, products]);
 
@@ -72,7 +72,7 @@ function Product() {
               <img
                 className="product-hero-img"
                 src={image}
-                alt={product.alt}
+                alt={product.name}
                 loading="eager"
                 decoding="async"
               />
