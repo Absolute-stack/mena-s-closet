@@ -11,6 +11,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [editingProduct, setEditingProduct] = useState(null);
   const [productForm, setProductForm] = useState({
     name: '',
     desc: '',
@@ -112,19 +113,7 @@ export default function AdminDashboard() {
       if (data.success) {
         alert('Product added!');
         fetchProducts();
-        setProductForm({
-          name: '',
-          desc: '',
-          price: '',
-          category: '',
-          subCategory: '',
-          gender: 'men',
-          bestseller: false,
-          accessories: false,
-          sizes: [],
-          stock: '',
-        });
-        setImages({ image1: null, image2: null, image3: null, image4: null });
+        resetForm();
       } else {
         alert(data.message);
       }
@@ -132,6 +121,69 @@ export default function AdminDashboard() {
       alert('Failed to add product');
     }
     setLoading(false);
+  };
+
+  const handleUpdateProduct = async () => {
+    if (!editingProduct) return;
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('id', editingProduct._id);
+
+      Object.keys(productForm).forEach((key) => {
+        if (key === 'sizes') {
+          formData.append(key, JSON.stringify(productForm[key]));
+        } else {
+          formData.append(key, productForm[key]);
+        }
+      });
+
+      Object.keys(images).forEach((key) => {
+        if (images[key]) formData.append(key, images[key]);
+      });
+
+      const response = await fetch(`${API_URL}/product/update`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert('Product updated successfully!');
+        fetchProducts();
+        resetForm();
+        setEditingProduct(null);
+        setActiveTab('products');
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      alert('Failed to update product');
+    }
+    setLoading(false);
+  };
+
+  const handleEditProduct = (product) => {
+    setEditingProduct(product);
+    setProductForm({
+      name: product.name,
+      desc: product.desc,
+      price: product.price,
+      category: product.category,
+      subCategory: product.subCategory || '',
+      gender: product.gender,
+      bestseller: product.bestseller,
+      accessories: product.accessories,
+      sizes: product.sizes,
+      stock: product.stock,
+    });
+    setImages({
+      image1: null,
+      image2: null,
+      image3: null,
+      image4: null,
+    });
+    setActiveTab('add-product');
   };
 
   const handleDeleteProduct = async (id) => {
@@ -178,6 +230,28 @@ export default function AdminDashboard() {
         ? prev.sizes.filter((s) => s !== size)
         : [...prev.sizes, size],
     }));
+  };
+
+  const resetForm = () => {
+    setProductForm({
+      name: '',
+      desc: '',
+      price: '',
+      category: '',
+      subCategory: '',
+      gender: 'men',
+      bestseller: false,
+      accessories: false,
+      sizes: [],
+      stock: '',
+    });
+    setImages({ image1: null, image2: null, image3: null, image4: null });
+    setEditingProduct(null);
+  };
+
+  const cancelEdit = () => {
+    resetForm();
+    setEditingProduct(null);
   };
 
   // LOGIN PAGE
@@ -274,6 +348,12 @@ export default function AdminDashboard() {
                       <td>{product.stock}</td>
                       <td>
                         <button
+                          onClick={() => handleEditProduct(product)}
+                          className="edit-button"
+                        >
+                          Edit
+                        </button>
+                        <button
                           onClick={() => handleDeleteProduct(product._id)}
                           className="delete-button"
                         >
@@ -288,10 +368,24 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Add Product Form */}
+        {/* Add/Edit Product Form */}
         {activeTab === 'add-product' && (
           <div className="content-card">
-            <h2 className="card-title">Add New Product</h2>
+            <h2 className="card-title">
+              {editingProduct ? 'Edit Product' : 'Add New Product'}
+            </h2>
+
+            {editingProduct && (
+              <div className="edit-notice">
+                <p>
+                  Editing: <strong>{editingProduct.name}</strong>
+                </p>
+                <button onClick={cancelEdit} className="cancel-edit-button">
+                  Cancel Edit
+                </button>
+              </div>
+            )}
+
             <div className="form-container">
               <div className="form-row">
                 <input
@@ -421,7 +515,26 @@ export default function AdminDashboard() {
               </div>
 
               <div>
-                <label className="form-label">Images (4 max)</label>
+                <label className="form-label">
+                  {editingProduct
+                    ? 'Images (Upload new images to add/replace - existing images will be kept)'
+                    : 'Images (4 max)'}
+                </label>
+                {editingProduct && editingProduct.images.length > 0 && (
+                  <div className="existing-images">
+                    <p className="existing-images-title">Current images:</p>
+                    <div className="existing-images-grid">
+                      {editingProduct.images.map((img, idx) => (
+                        <img
+                          key={idx}
+                          src={img}
+                          alt={`Product ${idx + 1}`}
+                          className="existing-image-preview"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div className="file-grid">
                   {['image1', 'image2', 'image3', 'image4'].map((key) => (
                     <input
@@ -438,11 +551,19 @@ export default function AdminDashboard() {
               </div>
 
               <button
-                onClick={handleAddProduct}
+                onClick={
+                  editingProduct ? handleUpdateProduct : handleAddProduct
+                }
                 disabled={loading}
                 className="submit-button"
               >
-                {loading ? 'Adding...' : 'Add Product'}
+                {loading
+                  ? editingProduct
+                    ? 'Updating...'
+                    : 'Adding...'
+                  : editingProduct
+                    ? 'Update Product'
+                    : 'Add Product'}
               </button>
             </div>
           </div>

@@ -30,9 +30,8 @@ async function addProduct(req, res) {
     const image2 = req.files?.image2?.[0];
     const image3 = req.files?.image3?.[0];
     const image4 = req.files?.image4?.[0];
-
     const images = [image1, image2, image3, image4].filter(
-      (item) => item !== undefined
+      (item) => item !== undefined,
     );
 
     if (images.length === 0) {
@@ -50,7 +49,7 @@ async function addProduct(req, res) {
           folder: 'products',
         });
         return result.secure_url;
-      })
+      }),
     );
 
     // Parse sizes if it's a JSON string
@@ -133,7 +132,7 @@ async function removeProduct(req, res) {
         product.images.map(async (imageUrl) => {
           const publicId = imageUrl.split('/').pop().split('.')[0];
           await cloudinary.uploader.destroy(`products/${publicId}`);
-        })
+        }),
       );
     }
 
@@ -224,13 +223,13 @@ async function updateProduct(req, res) {
     const image2 = req.files?.image2?.[0];
     const image3 = req.files?.image3?.[0];
     const image4 = req.files?.image4?.[0];
-
     const newImages = [image1, image2, image3, image4].filter(
-      (item) => item !== undefined
+      (item) => item !== undefined,
     );
 
     let imageUrls = [...product.images];
 
+    // Upload new images to Cloudinary if provided
     if (newImages.length > 0) {
       const uploadedUrls = await Promise.all(
         newImages.map(async (item) => {
@@ -239,24 +238,31 @@ async function updateProduct(req, res) {
             folder: 'products',
           });
           return result.secure_url;
-        })
+        }),
       );
       imageUrls = [...imageUrls, ...uploadedUrls];
     }
 
-    // Update fields
+    // Parse sizes if it's a JSON string
+    const parsedSizes = sizes
+      ? typeof sizes === 'string'
+        ? JSON.parse(sizes)
+        : sizes
+      : product.sizes;
+
+    // Update fields - only update if value is provided
     const updateData = {};
-    if (name) updateData.name = name;
-    if (desc) updateData.desc = desc;
-    if (price) updateData.price = Number(price);
-    if (category) updateData.category = category;
-    if (subCategory) updateData.subCategory = subCategory;
-    if (gender) updateData.gender = gender;
-    if (sizes)
-      updateData.sizes = typeof sizes === 'string' ? JSON.parse(sizes) : sizes;
-    if (bestseller !== undefined) updateData.bestseller = bestseller === 'true';
+    if (name !== undefined) updateData.name = name;
+    if (desc !== undefined) updateData.desc = desc;
+    if (price !== undefined) updateData.price = Number(price);
+    if (category !== undefined) updateData.category = category;
+    if (subCategory !== undefined) updateData.subCategory = subCategory;
+    if (gender !== undefined) updateData.gender = gender;
+    if (sizes !== undefined) updateData.sizes = parsedSizes;
+    if (bestseller !== undefined)
+      updateData.bestseller = bestseller === 'true' || bestseller === true;
     if (accessories !== undefined)
-      updateData.accessories = accessories === 'true';
+      updateData.accessories = accessories === 'true' || accessories === true;
     if (stock !== undefined) updateData.stock = Number(stock);
     if (imageUrls.length > 0) updateData.images = imageUrls;
 
@@ -266,7 +272,7 @@ async function updateProduct(req, res) {
       {
         new: true,
         runValidators: true,
-      }
+      },
     );
 
     res.json({
@@ -279,6 +285,7 @@ async function updateProduct(req, res) {
     res.status(500).json({
       success: false,
       message: 'Failed to update product',
+      error: error.message,
     });
   }
 }
