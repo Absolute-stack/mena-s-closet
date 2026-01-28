@@ -14,7 +14,6 @@ const productRouter = express.Router();
 // Admin routes
 productRouter.post(
   '/add',
-  adminAuth,
   upload.fields([
     { name: 'image1', maxCount: 1 },
     { name: 'image2', maxCount: 1 },
@@ -26,7 +25,6 @@ productRouter.post(
 
 productRouter.post(
   '/update',
-  adminAuth,
   upload.fields([
     { name: 'image1', maxCount: 1 },
     { name: 'image2', maxCount: 1 },
@@ -36,7 +34,7 @@ productRouter.post(
   updateProduct,
 );
 
-productRouter.post('/remove', adminAuth, removeProduct);
+productRouter.post('/remove', removeProduct);
 
 // Public routes
 productRouter.get('/list', listProducts);
