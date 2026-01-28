@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './Admin.css';
 
-const API_URL = 'http://localhost:9223/api';
+const API_URL = `${import.meta.env.VITE_BACKEND_URL}/api`;
 
 export default function AdminDashboard() {
   const [token, setToken] = useState(localStorage.getItem('adminToken') || '');
