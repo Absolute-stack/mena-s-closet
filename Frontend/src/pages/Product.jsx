@@ -258,7 +258,7 @@ function Product() {
                 className="info-header flex-sb"
                 onClick={() => handleClick(setFabric)}
               >
-                <p className>Fabric & Care</p>
+                <p>Fabric & Care</p>
                 <span className={fabric === true ? 'active' : ''}>&#8964;</span>
               </div>
               <div className={`info ${fabric == true ? 'active' : ''}`}>
