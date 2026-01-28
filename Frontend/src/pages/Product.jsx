@@ -22,9 +22,13 @@ function Product() {
 
   const product = products?.find((p) => String(p.id) === String(id));
 
-  if (!products)
-    return <div>Something Went Wrong Fetching Data For Product.</div>;
-  if (!product) return <div>Product not Found</div>;
+  if (!products || products.length === 0) {
+    return <div>Loading product...</div>;
+  }
+
+  if (!product) {
+    return <div>Product not found</div>;
+  }
 
   function handleImages(src) {
     setImage(src);
