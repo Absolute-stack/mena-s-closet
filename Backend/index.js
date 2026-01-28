@@ -19,7 +19,7 @@ const PORT = process.env.PORT || 4000;
 const app = express();
 
 // Trust proxy for rate limiting
-app.set('trust proxy', false);
+app.set('trust proxy', 1);
 
 // Allowed origins
 const allowedOrigins = [
