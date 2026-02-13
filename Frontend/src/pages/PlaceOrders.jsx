@@ -144,48 +144,7 @@ function PlaceOrders() {
         return;
       }
 
-      // Initialize
-      const handler = PaystackPop.setup({
-        key: PAYSTACK_KEY,
-        email: address.email,
-        amount: totalAmount * 100, // Convert to pesewas
-        currency: 'GHS',
-        metadata: {
-          custom_fields: [
-            {
-              display_name: 'Customer Name',
-              variable_name: 'customer_name',
-              value: address.fullname,
-            },
-            {
-              display_name: 'Phone Number',
-              variable_name: 'phone',
-              value: address.phone,
-            },
-          ],
-        },
-        callback: function (response) {
-          // Payment successful
-          verifyPaymentAndCreateOrder(response.reference);
-        },
-        onClose: function () {
-          toast.info('Payment cancelled');
-          setLoading(false);
-        },
-      });
-
-      handler.openIframe();
-    } catch (error) {
-      console.error('Checkout error:', error);
-      toast.error('Failed to initialize payment');
-      setLoading(false);
-    }
-  }
-
-  // Verify payment and create order
-  async function verifyPaymentAndCreateOrder(reference) {
-    try {
-      // Create order
+      // 1. CREATE ORDER FIRST (with Pending payment status)
       const orderResponse = await fetch(`${backend}/api/order/place`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -207,26 +166,80 @@ function PlaceOrders() {
           },
           paymentInfo: {
             method: 'Paystack',
-            reference: reference,
-            status: 'Paid',
+            status: 'Pending',
           },
         }),
       });
 
       const orderData = await orderResponse.json();
 
-      if (orderData.success) {
-        // Verify payment with backend
-        await fetch(`${backend}/api/order/verify`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            reference: reference,
-            orderId: orderData.order._id,
-          }),
-        });
+      if (!orderData.success) {
+        toast.error(orderData.message || 'Failed to create order');
+        setLoading(false);
+        return;
+      }
 
+      const orderId = orderData.order._id;
+
+      // 2. NOW OPEN PAYSTACK
+      const handler = PaystackPop.setup({
+        key: PAYSTACK_KEY,
+        email: address.email,
+        amount: totalAmount * 100, // Convert to pesewas
+        currency: 'GHS',
+        metadata: {
+          custom_fields: [
+            {
+              display_name: 'Customer Name',
+              variable_name: 'customer_name',
+              value: address.fullname,
+            },
+            {
+              display_name: 'Phone Number',
+              variable_name: 'phone',
+              value: address.phone,
+            },
+            {
+              display_name: 'Order ID',
+              variable_name: 'order_id',
+              value: orderId,
+            },
+          ],
+        },
+        callback: function (response) {
+          // Payment successful - verify it
+          verifyPayment(response.reference, orderId);
+        },
+        onClose: function () {
+          toast.info('Payment cancelled');
+          setLoading(false);
+        },
+      });
+
+      handler.openIframe();
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast.error('Failed to initialize payment');
+      setLoading(false);
+    }
+  }
+
+  // Verify payment (simplified - just verify, don't create order)
+  async function verifyPayment(reference, orderId) {
+    try {
+      const verifyResponse = await fetch(`${backend}/api/order/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          reference: reference,
+          orderId: orderId,
+        }),
+      });
+
+      const verifyData = await verifyResponse.json();
+
+      if (verifyData.success) {
         // Clear buyNow state if this was a Buy Now order
         if (isBuyNow) {
           setBuyNowProduct(null);
@@ -236,12 +249,12 @@ function PlaceOrders() {
         toast.success('Order placed successfully!');
         navigate(`/verify?reference=${reference}&success=true`);
       } else {
-        toast.error(orderData.message || 'Failed to create order');
+        toast.error(verifyData.message || 'Payment verification failed');
         setLoading(false);
       }
     } catch (error) {
-      console.error('Order creation error:', error);
-      toast.error('Failed to create order');
+      console.error('Payment verification error:', error);
+      toast.error('Failed to verify payment');
       setLoading(false);
     }
   }
