@@ -103,13 +103,6 @@ orderSchema.index({ userId: 1, date: -1 });
 orderSchema.index({ orderStatus: 1, date: -1 });
 orderSchema.index({ paymentStatus: 1 });
 
-// Calculate total before saving - FIXED VERSION
-orderSchema.pre('save', function (next) {
-  // Always calculate totalAmount from subtotal + deliveryFee
-  this.totalAmount = this.subtotal + this.deliveryFee;
-  next();
-});
-
 const orderModel =
   mongoose.models.order || mongoose.model('order', orderSchema);
 
