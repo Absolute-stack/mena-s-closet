@@ -1,6 +1,40 @@
 import orderModel from '../models/orderModel.js';
 import userModel from '../models/userModel.js';
 import productModel from '../models/productModel.js';
+import twilio from 'twilio';
+
+// Initialize Twilio client
+const twilioClient = twilio(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN,
+);
+
+// Owner/Admin phone number (add this to your .env)
+const OWNER_PHONE_NUMBER = process.env.OWNER_PHONE_NUMBER; // Owner's phone number
+const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER; // Your Twilio number
+
+// Helper function to send SMS to owner
+async function sendOwnerSMS(message) {
+  try {
+    if (!TWILIO_PHONE_NUMBER || !OWNER_PHONE_NUMBER) {
+      console.log('Twilio not configured. Message would be:', message);
+      return;
+    }
+
+    const result = await twilioClient.messages.create({
+      body: message,
+      from: TWILIO_PHONE_NUMBER,
+      to: OWNER_PHONE_NUMBER,
+    });
+
+    console.log('SMS sent to owner successfully:', result.sid);
+    return result;
+  } catch (error) {
+    console.error('SMS error:', error.message);
+    // Don't fail the order if SMS fails
+    return null;
+  }
+}
 
 // Place order - works for both guest and authenticated users
 async function placeOrder(req, res) {
@@ -76,6 +110,32 @@ async function placeOrder(req, res) {
     if (userId) {
       await userModel.findByIdAndUpdate(userId, { cartData: {} });
     }
+
+    // 📱 Send SMS notification to OWNER about new order
+    const orderIdShort = newOrder._id.toString().slice(-8).toUpperCase();
+    const itemsList = orderItems
+      .map((item) => `- ${item.name} (${item.size}) x${item.quantity}`)
+      .join('\n');
+
+    const ownerMessage = `🛍️ NEW ORDER #${orderIdShort}
+
+Customer: ${address.firstName} ${address.lastName}
+Phone: ${address.phone}
+Email: ${address.email}
+
+Items:
+${itemsList}
+
+Delivery to:
+${address.street}
+${address.city}, ${address.state}
+
+Amount: GH₵${totalAmount.toFixed(2)}
+Status: ${paymentInfo?.status || 'Pending'}
+
+- Mena's Closet`;
+
+    await sendOwnerSMS(ownerMessage);
 
     res.status(201).json({
       success: true,
@@ -167,6 +227,23 @@ async function verifyPayment(req, res) {
 
     await order.save();
 
+    // 📱 Send SMS to OWNER confirming payment received
+    const orderIdShort = order._id.toString().slice(-8).toUpperCase();
+    const ownerMessage = `💰 PAYMENT CONFIRMED #${orderIdShort}
+
+Customer: ${order.shippingAddress.firstName} ${order.shippingAddress.lastName}
+Amount: GH₵${order.totalAmount.toFixed(2)}
+Phone: ${order.shippingAddress.phone}
+
+Payment Method: ${order.paymentMethod}
+Reference: ${reference}
+
+Ready to pack and ship!
+
+- Mena's Closet`;
+
+    await sendOwnerSMS(ownerMessage);
+
     return res.json({
       success: true,
       message: 'Payment verified successfully',
@@ -257,7 +334,35 @@ async function updateStatus(req, res) {
       });
     }
 
+    // Get the order before updating
+    const order = await orderModel.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found',
+      });
+    }
+
+    // Update order status
     await orderModel.findByIdAndUpdate(orderId, { orderStatus: status });
+
+    // 📱 Send SMS to OWNER when order status changes to Delivered
+    const orderIdShort = order._id.toString().slice(-8).toUpperCase();
+
+    if (status === 'Delivered') {
+      const ownerMessage = `✅ ORDER DELIVERED #${orderIdShort}
+
+Customer: ${order.shippingAddress.firstName} ${order.shippingAddress.lastName}
+Phone: ${order.shippingAddress.phone}
+Amount: GH₵${order.totalAmount.toFixed(2)}
+
+Order completed successfully! 🎉
+
+- Mena's Closet`;
+
+      await sendOwnerSMS(ownerMessage);
+    }
 
     res.json({
       success: true,

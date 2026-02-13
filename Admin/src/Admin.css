@@ -155,9 +155,9 @@ body {
 
 .tabs-container {
   display: flex;
-  margin-inline-start: 3rem;
+  margin-inline: auto;
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin-block: 2rem;
   flex-wrap: wrap;
 }
 
@@ -1067,6 +1067,11 @@ body {
    =================================== */
 
 @media (max-width: 480px) {
+  .tabs-container {
+    margin-inline-start: 1.5rem;
+    margin-block-start: 1.5rem;
+  }
+
   .pagination button {
     padding: 0.4rem 0.6rem;
     font-size: 0.75rem;
