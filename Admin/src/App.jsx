@@ -12,6 +12,7 @@ export default function AdminDashboard() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [editingProduct, setEditingProduct] = useState(null);
+  const [expandedOrder, setExpandedOrder] = useState(null);
   const [productForm, setProductForm] = useState({
     name: '',
     desc: '',
@@ -269,7 +270,11 @@ export default function AdminDashboard() {
       o._id.toLowerCase().includes(searchQueryOrders.toLowerCase()) ||
       (o.userId?.name || 'Guest')
         .toLowerCase()
-        .includes(searchQueryOrders.toLowerCase()),
+        .includes(searchQueryOrders.toLowerCase()) ||
+      o.shippingAddress.email
+        .toLowerCase()
+        .includes(searchQueryOrders.toLowerCase()) ||
+      o.shippingAddress.phone.includes(searchQueryOrders),
   );
   const totalPagesOrders = Math.ceil(
     filteredOrders.length / itemsPerPageOrders,
@@ -649,7 +654,7 @@ export default function AdminDashboard() {
             {/* Search Orders */}
             <input
               type="text"
-              placeholder="Search by order ID or customer name..."
+              placeholder="Search by order ID, customer name, email, or phone..."
               value={searchQueryOrders}
               onChange={(e) => {
                 setSearchQueryOrders(e.target.value);
@@ -660,37 +665,149 @@ export default function AdminDashboard() {
 
             <div className="orders-container">
               {displayedOrders.map((order) => (
-                <div key={order._id} className="order-card">
-                  <div className="order-header">
-                    <div>
-                      <p className="order-id">Order #{order._id.slice(-6)}</p>
-                      <p className="order-customer">
-                        {order.userId?.name || 'Guest Customer'} -{' '}
-                        {order.userId?.email || order.shippingAddress.email}
+                <div key={order._id} className="order-card-enhanced">
+                  {/* Order Header */}
+                  <div className="order-header-enhanced">
+                    <div className="order-header-left">
+                      <p className="order-id">
+                        Order #{order._id.slice(-8).toUpperCase()}
                       </p>
                       <p className="order-date">
-                        {new Date(order.date).toLocaleDateString()}
+                        {new Date(order.date).toLocaleString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
                       </p>
                     </div>
-                    <p className="order-total">GH₵{order.totalAmount}</p>
+                    <div className="order-header-right">
+                      <p className="order-total">GH₵{order.totalAmount}</p>
+                      <div className="badge-group">
+                        <span
+                          className={`payment-badge ${order.paymentStatus === 'Paid' ? 'paid' : 'pending'}`}
+                        >
+                          {order.paymentStatus}
+                        </span>
+                        <span className="order-status-badge">
+                          {order.orderStatus}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="order-items">
-                    <p className="items-title">Items:</p>
-                    {order.items.map((item, idx) => (
-                      <p key={idx} className="order-item">
-                        {item.name} x{item.quantity} ({item.size})
+                  {/* Customer Info */}
+                  <div className="order-section">
+                    <h4 className="section-title">Customer Information</h4>
+                    <div className="info-grid">
+                      <div className="info-item">
+                        <span className="info-label">Name:</span>
+                        <span className="info-value">
+                          {order.shippingAddress.firstName}{' '}
+                          {order.shippingAddress.lastName}
+                        </span>
+                      </div>
+                      <div className="info-item">
+                        <span className="info-label">Email:</span>
+                        <span className="info-value">
+                          {order.shippingAddress.email}
+                        </span>
+                      </div>
+                      <div className="info-item">
+                        <span className="info-label">Phone:</span>
+                        <span className="info-value">
+                          {order.shippingAddress.phone}
+                        </span>
+                      </div>
+                      <div className="info-item">
+                        <span className="info-label">Account:</span>
+                        <span className="info-value">
+                          {order.userId ? order.userId.name : 'Guest User'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Shipping Address */}
+                  <div className="order-section">
+                    <h4 className="section-title">Shipping Address</h4>
+                    <div className="address-box">
+                      <p>{order.shippingAddress.street}</p>
+                      <p>
+                        {order.shippingAddress.city},{' '}
+                        {order.shippingAddress.state}
                       </p>
-                    ))}
+                      <p>
+                        {order.shippingAddress.country},{' '}
+                        {order.shippingAddress.zipcode}
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="order-footer">
+                  {/* Order Items */}
+                  <div className="order-section">
+                    <h4 className="section-title">
+                      Order Items ({order.items.length})
+                    </h4>
+                    <div className="items-list-enhanced">
+                      {order.items.map((item, idx) => (
+                        <div key={idx} className="item-row-enhanced">
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="item-image-enhanced"
+                          />
+                          <div className="item-details-enhanced">
+                            <p className="item-name-enhanced">{item.name}</p>
+                            <p className="item-meta">
+                              Size: {item.size} • Qty: {item.quantity}
+                            </p>
+                            <p className="item-price">
+                              GH₵{item.price} × {item.quantity} = GH₵
+                              {(item.price * item.quantity).toFixed(2)}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Payment & Price Breakdown */}
+                  <div className="order-section">
+                    <h4 className="section-title">Payment Details</h4>
+                    <div className="price-breakdown">
+                      <div className="price-row">
+                        <span>Subtotal:</span>
+                        <span>GH₵{order.subtotal}</span>
+                      </div>
+                      <div className="price-row">
+                        <span>Delivery Fee:</span>
+                        <span>GH₵{order.deliveryFee}</span>
+                      </div>
+                      <div className="price-row total-row">
+                        <span>Total:</span>
+                        <span>GH₵{order.totalAmount}</span>
+                      </div>
+                      <div className="payment-method-info">
+                        <span>Method: {order.paymentMethod}</span>
+                        {order.paymentInfo?.reference && (
+                          <span className="payment-ref">
+                            Ref: {order.paymentInfo.reference}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Order Actions */}
+                  <div className="order-footer-enhanced">
                     <select
                       value={order.orderStatus}
                       onChange={(e) =>
                         handleUpdateOrderStatus(order._id, e.target.value)
                       }
-                      className="status-select"
+                      className="status-select-enhanced"
                     >
                       <option value="Order Placed">Order Placed</option>
                       <option value="Packing">Packing</option>
@@ -698,11 +815,16 @@ export default function AdminDashboard() {
                       <option value="Out for delivery">Out for delivery</option>
                       <option value="Delivered">Delivered</option>
                     </select>
-                    <span
-                      className={`payment-badge ${order.paymentStatus === 'Paid' ? 'paid' : 'pending'}`}
+                    <button
+                      onClick={() =>
+                        setExpandedOrder(
+                          expandedOrder === order._id ? null : order._id,
+                        )
+                      }
+                      className="toggle-details-btn"
                     >
-                      {order.paymentStatus}
-                    </span>
+                      {expandedOrder === order._id ? 'Show Less' : 'Show More'}
+                    </button>
                   </div>
                 </div>
               ))}
