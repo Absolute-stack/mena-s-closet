@@ -4,7 +4,7 @@ import productModel from '../models/productModel.js';
 import Twilio from 'twilio';
 
 const client = new Twilio(
-  process.env.TWILIO_SID,
+  process.env.TWILIO_ACCOUNT_SID,
   process.env.TWILIO_AUTH_TOKEN,
 );
 
@@ -25,7 +25,7 @@ ${order.items.map((i) => `${i.name} x${i.quantity}`).join(', ')}
 
     await client.messages.create({
       body: smsMessage,
-      from: process.env.TWILIO_NUMBER, // your Twilio number
+      from: '+15704130371', // your Twilio number
       to: '+233551467062', // Ghana shop owner number
     });
 
