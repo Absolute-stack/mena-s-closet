@@ -145,6 +145,13 @@ function PlaceOrders() {
       }
 
       // Initialize Paystack
+
+      console.log({
+        key: PAYSTACK_KEY,
+        email: address.email,
+        amount: totalAmount,
+      });
+
       const handler = PaystackPop.setup({
         key: PAYSTACK_KEY,
         email: address.email,
@@ -245,6 +252,10 @@ function PlaceOrders() {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    console.log(PAYSTACK_KEY);
+  }, []);
 
   return (
     <main className="placeOrders-section">
