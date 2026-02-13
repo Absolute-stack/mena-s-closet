@@ -116,7 +116,7 @@ function PlaceOrders() {
 
   // Calculate totals
   const subtotal = isBuyNow ? buyNowProduct.price : getCartTotalPrice();
-  const deliveryFee = 0.5;
+  const deliveryFee = 0;
   const totalAmount = subtotal + deliveryFee;
 
   // Handle checkout

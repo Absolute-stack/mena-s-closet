@@ -67,7 +67,7 @@ function Cart() {
   }
 
   const subtotal = getCartTotalPrice();
-  const deliveryFee = 30; // Your original delivery fee
+  const deliveryFee = 0; // Your original delivery fee
   const total = subtotal + deliveryFee;
   const totalItems = getTotalCartNumber();
 
