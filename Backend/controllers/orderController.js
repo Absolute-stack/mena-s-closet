@@ -1,48 +1,21 @@
 import orderModel from '../models/orderModel.js';
 import userModel from '../models/userModel.js';
 import productModel from '../models/productModel.js';
-import Twilio from 'twilio';
 
-const client = new Twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN,
-);
-
-async function sendOrderSMS(order) {
-  try {
-    const smsMessage = `
-NEW ORDER RECEIVED
-Order ID: ${order._id}
-Total: GHS ${order.totalAmount}
-
-Customer:
-${order.shippingAddress.fullName}
-${order.shippingAddress.phone}
-
-Items:
-${order.items.map((i) => `${i.name} x${i.quantity}`).join(', ')}
-`;
-
-    await client.messages.create({
-      body: smsMessage,
-      from: '+15704130371', // your Twilio number
-      to: '+233551467062', // Ghana shop owner number
-    });
-
-    console.log('Order SMS sent successfully');
-  } catch (err) {
-    console.error('Failed to send order SMS:', err);
-  }
-}
-
-// =====================
-// Place Order
-// =====================
+// Place order - works for both guest and authenticated users
 async function placeOrder(req, res) {
   try {
     const { items, address, paymentInfo } = req.body;
-    const userId = req.userId;
+    const userId = req.userId; // may be undefined for guests
 
+    if (!items || !address) {
+      return res.status(400).json({
+        success: false,
+        message: 'Items and address are required',
+      });
+    }
+
+    // Validate items and calculate subtotal
     let subtotal = 0;
     const orderItems = [];
 
@@ -50,9 +23,10 @@ async function placeOrder(req, res) {
       const product = await productModel.findById(item.productId);
 
       if (!product) {
-        return res
-          .status(404)
-          .json({ success: false, message: 'Product not found' });
+        return res.status(404).json({
+          success: false,
+          message: `Product ${item.productId} not found`,
+        });
       }
 
       if (product.stock < item.quantity) {
@@ -72,113 +46,139 @@ async function placeOrder(req, res) {
       });
 
       subtotal += product.price * item.quantity;
+
+      // Update product stock
+      await productModel.findByIdAndUpdate(product._id, {
+        $inc: { stock: -item.quantity },
+      });
     }
 
-    const deliveryFee = 0;
+    const deliveryFee = 0; // Free delivery or set your fee
     const totalAmount = subtotal + deliveryFee;
 
-    const newOrder = new orderModel({
-      userId: userId || null,
+    // Create order
+    const orderData = {
+      userId: userId || null, // null for guest orders
       items: orderItems,
       shippingAddress: address,
+      paymentMethod: paymentInfo?.method || 'Paystack',
+      paymentStatus: paymentInfo?.status || 'Pending',
       subtotal,
       deliveryFee,
       totalAmount,
-      paymentMethod: 'Paystack',
-      paymentStatus: 'Pending',
-      paymentInfo: {
-        reference: paymentInfo.reference,
-      },
-    });
+      paymentInfo: paymentInfo || {},
+    };
 
+    const newOrder = new orderModel(orderData);
     await newOrder.save();
+
+    // Clear cart for authenticated users
+    if (userId) {
+      await userModel.findByIdAndUpdate(userId, { cartData: {} });
+    }
 
     res.status(201).json({
       success: true,
+      message: 'Order placed successfully',
       order: newOrder,
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: 'Order failed' });
+  } catch (error) {
+    console.error('Place order error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to place order',
+    });
   }
 }
 
-// =====================
-// Verify Payment
-// =====================
+// Verify payment and update order
 async function verifyPayment(req, res) {
   try {
-    const { reference, orderData } = req.body;
+    const { reference, orderId } = req.body;
 
-    if (!reference || !orderData)
-      return res
-        .status(400)
-        .json({ success: false, message: 'Reference and order data required' });
-
-    // Verify Paystack
-    const paystackResponse = await fetch(
-      `https://api.paystack.co/transaction/verify/${reference}`,
-      { headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET}` } },
-    );
-    const paystackData = await paystackResponse.json();
-
-    if (!paystackData.status || paystackData.data.status !== 'success')
-      return res
-        .status(400)
-        .json({ success: false, message: 'Payment not successful' });
-
-    const paymentData = paystackData.data;
-    if (paymentData.amount !== orderData.totalAmount * 100)
-      return res
-        .status(400)
-        .json({ success: false, message: 'Amount mismatch' });
-
-    // ✅ Create order
-    const order = await orderModel.create({
-      userId: orderData.userId,
-      items: orderData.items,
-      shippingAddress: orderData.shippingAddress,
-      subtotal: orderData.subtotal,
-      deliveryFee: orderData.deliveryFee,
-      totalAmount: orderData.totalAmount,
-      paymentMethod: 'Paystack',
-      paymentStatus: 'Paid',
-      paymentInfo: {
-        reference,
-        verifiedAt: new Date(),
-        paystackTransactionId: paymentData.id,
-      },
-    });
-
-    // Reduce stock in parallel
-    await Promise.all(
-      order.items.map((item) =>
-        productModel.findByIdAndUpdate(item.productId, {
-          $inc: { stock: -item.quantity },
-        }),
-      ),
-    );
-
-    // Clear user cart if logged in
-    if (order.userId) {
-      userModel
-        .findByIdAndUpdate(order.userId, { cartData: {} })
-        .catch(console.error);
+    if (!reference) {
+      return res.status(400).json({
+        success: false,
+        message: 'Payment reference is required',
+      });
     }
 
-    // Send SMS asynchronously
-    sendOrderSMS(order);
+    // 🔐 Verify transaction with Paystack using native fetch
+    const paystackResponse = await fetch(
+      `https://api.paystack.co/transaction/verify/${reference}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+
+    const paystackData = await paystackResponse.json();
+
+    if (!paystackResponse.ok || paystackData.data.status !== 'success') {
+      return res.status(400).json({
+        success: false,
+        message: 'Payment not successful',
+      });
+    }
+
+    const paymentData = paystackData.data;
+
+    // 🔎 Find the order
+    let order;
+    if (orderId) {
+      order = await orderModel.findById(orderId);
+    } else {
+      order = await orderModel.findOne({
+        'paymentInfo.reference': reference,
+      });
+    }
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found',
+      });
+    }
+
+    // 🛡 Extra security: Verify amount (Paystack sends amount in pesewas)
+    if (paymentData.amount !== order.totalAmount * 100) {
+      return res.status(400).json({
+        success: false,
+        message: 'Amount mismatch',
+      });
+    }
+
+    // 🛡 Optional: Verify currency
+    if (paymentData.currency !== 'GHS') {
+      return res.status(400).json({
+        success: false,
+        message: 'Currency mismatch',
+      });
+    }
+
+    // ✅ Update order only after successful verification
+    order.paymentStatus = 'Paid';
+    order.paymentInfo.reference = reference;
+    order.paymentInfo.verifiedAt = new Date();
+    order.paymentInfo.paystackTransactionId = paymentData.id;
+
+    await order.save();
 
     return res.json({
       success: true,
-      message: 'Payment verified, order created and SMS sent',
+      message: 'Payment verified successfully',
       order,
     });
   } catch (error) {
-    console.error('Verify payment error:', error);
-    return res
-      .status(500)
-      .json({ success: false, message: 'Payment verification failed' });
+    console.error('Verify payment error:', error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to verify payment',
+    });
   }
 }
 
