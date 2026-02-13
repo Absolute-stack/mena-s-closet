@@ -132,9 +132,9 @@
 
   .card-grid-container .product-item img {
     width: 100%;
-    aspect-ratio: 3 / 4; /* Maintains proper portrait ratio */
-    object-fit: cover;
-    object-position: center; /* Ensures image is centered */
+    height: auto; /* Let the image determine its own height */
+    max-height: 500px; /* Optional: limit maximum height */
+    object-fit: contain; /* Shows full image without cropping */
     border-radius: 0.75rem;
     transition: transform 0.35s ease;
   }
