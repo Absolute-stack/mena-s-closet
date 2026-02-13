@@ -103,11 +103,9 @@ orderSchema.index({ userId: 1, date: -1 });
 orderSchema.index({ orderStatus: 1, date: -1 });
 orderSchema.index({ paymentStatus: 1 });
 
-// Calculate total before saving
+// Calculate total before saving - FIXED VERSION
 orderSchema.pre('save', function (next) {
-  if (!this.isModified('subtotal') && !this.isModified('deliveryFee')) {
-    return next();
-  }
+  // Always calculate totalAmount from subtotal + deliveryFee
   this.totalAmount = this.subtotal + this.deliveryFee;
   next();
 });
