@@ -137,8 +137,6 @@ function PlaceOrders() {
     setLoading(true);
 
     try {
-      console.log('🔵 Step 1: Creating order...');
-
       // Check if Paystack script is loaded
       if (typeof PaystackPop === 'undefined') {
         toast.error('Payment system not loaded. Please refresh the page.');
@@ -174,20 +172,16 @@ function PlaceOrders() {
       });
 
       const orderData = await orderResponse.json();
-      console.log('📦 Order response:', orderData);
 
       if (!orderData.success) {
-        console.error('❌ Order creation failed:', orderData.message);
         toast.error(orderData.message || 'Failed to create order');
         setLoading(false);
         return;
       }
 
       const orderId = orderData.order._id;
-      console.log('✅ Order created successfully! OrderID:', orderId);
 
       // 2. NOW OPEN PAYSTACK
-      console.log('🔵 Step 2: Opening Paystack...');
       const handler = PaystackPop.setup({
         key: PAYSTACK_KEY,
         email: address.email,
@@ -213,12 +207,10 @@ function PlaceOrders() {
           ],
         },
         callback: function (response) {
-          console.log('💳 Payment callback received:', response);
-          // Payment successful - verify it
-          verifyPayment(response.reference, orderId);
+          // Payment successful - redirect immediately, verify in background
+          handlePaymentSuccess(response.reference, orderId);
         },
         onClose: function () {
-          console.log('❌ Payment popup closed');
           toast.info('Payment cancelled');
           setLoading(false);
         },
@@ -226,51 +218,36 @@ function PlaceOrders() {
 
       handler.openIframe();
     } catch (error) {
-      console.error('💥 Checkout error:', error);
+      console.error('Checkout error:', error);
       toast.error('Failed to initialize payment');
       setLoading(false);
     }
   }
 
-  // Verify payment (simplified - just verify, don't create order)
-  async function verifyPayment(reference, orderId) {
-    console.log('🔵 Step 3: Verifying payment...', { reference, orderId });
-
-    try {
-      const verifyResponse = await fetch(`${backend}/api/order/verify`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          reference: reference,
-          orderId: orderId,
-        }),
-      });
-
-      const verifyData = await verifyResponse.json();
-      console.log('✅ Verify response:', verifyData);
-
-      if (verifyData.success) {
-        console.log('🎉 Payment verified successfully!');
-
-        // Clear buyNow state if this was a Buy Now order
-        if (isBuyNow) {
-          setBuyNowProduct(null);
-          setBuyNowSize(null);
-        }
-
-        toast.success('Order placed successfully!');
-        navigate(`/verify?reference=${reference}&success=true`);
-      } else {
-        console.error('❌ Payment verification failed:', verifyData.message);
-        toast.error(verifyData.message || 'Payment verification failed');
-        setLoading(false);
-      }
-    } catch (error) {
-      console.error('💥 Payment verification error:', error);
-      toast.error('Failed to verify payment');
-      setLoading(false);
+  // Handle successful payment - redirect immediately, verify async
+  async function handlePaymentSuccess(reference, orderId) {
+    // Clear buyNow state if this was a Buy Now order
+    if (isBuyNow) {
+      setBuyNowProduct(null);
+      setBuyNowSize(null);
     }
+
+    // Show success and redirect immediately
+    toast.success('Payment successful! Processing your order...');
+    navigate(`/verify?reference=${reference}&orderId=${orderId}&success=true`);
+
+    // Verify in background (non-blocking)
+    fetch(`${backend}/api/order/verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        reference: reference,
+        orderId: orderId,
+      }),
+    }).catch((error) => {
+      console.error('Background verification error:', error);
+    });
   }
 
   return (
