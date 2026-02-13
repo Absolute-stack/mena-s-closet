@@ -103,21 +103,6 @@
     border-radius: 0.85rem;
   }
 
-  .card-grid-container .product-item {
-    width: 315px;
-    height: 400px;
-    margin-inline: auto;
-    overflow: hidden;
-  }
-
-  .card-grid-container .product-item img {
-    width: 100%;
-    height: 380px;
-    object-fit: cover;
-    border-radius: 1rem;
-    transition: transform 0.35s ease;
-  }
-
   .newarrivals-grid {
     margin-top: 1.5rem;
     gap: 1.25rem;
@@ -136,12 +121,23 @@
     gap: 1rem;
   }
 
-  .card-grid-container img {
-    aspect-ratio: 2 / 3;
+  .card-grid-container .product-item {
+    width: 100%;
+    margin-inline: auto;
+  }
+
+  .card-grid-container .product-item .product-img-container {
+    width: 100%;
+  }
+
+  .card-grid-container .product-item img {
+    width: 100%;
+    height: 450px; /* Fixed height for nice presentation */
+    object-fit: cover;
     border-radius: 0.75rem;
+    transition: transform 0.35s ease;
   }
 }
-
 /* ===============================
    SMALL MOBILE (≤375px)
 ================================ */
