@@ -319,8 +319,8 @@
 }
 
 .related-products .product-img-container {
-  width: 300px;
-  height: 380px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
 }
 
