@@ -109,7 +109,7 @@
     overflow: hidden;
   }
 
-  .card-grid-container img {
+  .card-grid-container .product-item img {
     width: 100%;
     height: 100%;
     object-fit: cover;
