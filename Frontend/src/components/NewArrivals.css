@@ -38,9 +38,21 @@
   gap: 1.25rem;
 }
 
-/* IMAGE WRAPPER (IMPORTANT FOR CONSISTENCY) */
-.card-grid-container img {
+/* Override ProductItem styles for NewArrivals section */
+.newarrivals .product-item {
   width: 100%;
+  max-width: 100%;
+}
+
+.newarrivals .product-img-container {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+}
+
+.newarrivals .product-img-container img {
+  width: 100%;
+  height: 100%;
   aspect-ratio: 3 / 4;
   object-fit: cover;
   border-radius: 1rem;
@@ -49,7 +61,7 @@
 
 /* Hover only on devices that support it */
 @media (hover: hover) {
-  .card-grid-container img:hover {
+  .newarrivals .product-img-container img:hover {
     transform: scale(1.05);
   }
 }
@@ -88,7 +100,7 @@
     gap: 1.1rem;
   }
 
-  .card-grid-container img {
+  .newarrivals .product-img-container img {
     border-radius: 0.85rem;
   }
 }
@@ -121,24 +133,24 @@
     gap: 1rem;
   }
 
-  .card-grid-container .product-item {
-    width: 100%;
+  /* Mobile: Show full product nicely */
+  .newarrivals .product-item {
+    max-width: 400px;
     margin-inline: auto;
   }
 
-  .card-grid-container .product-item .product-img-container {
-    width: 100%;
+  .newarrivals .product-img-container {
+    aspect-ratio: 3 / 4;
+    height: auto;
   }
 
-  .card-grid-container .product-item img {
-    width: 100%;
-    height: auto; /* Let the image determine its own height */
-    max-height: 500px; /* Optional: limit maximum height */
-    object-fit: contain; /* Shows full image without cropping */
+  .newarrivals .product-img-container img {
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
     border-radius: 0.75rem;
-    transition: transform 0.35s ease;
   }
 }
+
 /* ===============================
    SMALL MOBILE (≤375px)
 ================================ */
@@ -160,7 +172,7 @@
     gap: 0.85rem;
   }
 
-  .card-grid-container img {
+  .newarrivals .product-img-container img {
     border-radius: 0.65rem;
   }
 }
