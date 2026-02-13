@@ -731,3 +731,161 @@ body {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* ===================================
+   SEARCH INPUT
+   =================================== */
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+/* ===================================
+   PAGINATION
+   =================================== */
+
+.pagination {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.pagination button {
+  padding: 0.5rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background: white;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.pagination button:hover {
+  background: #f3f4f6;
+  border-color: #667eea;
+}
+
+.pagination button:disabled {
+  background: #e5e7eb;
+  cursor: not-allowed;
+}
+
+.active-page {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: #667eea;
+}
+
+/* ===================================
+   ACTION BUTTONS
+   =================================== */
+
+.products-table button {
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  border: none;
+  font-size: 0.8rem;
+  cursor: pointer;
+  margin-right: 0.4rem;
+  transition: all 0.2s;
+}
+
+.products-table button:first-child {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.products-table button:first-child:hover {
+  background-color: #2563eb;
+}
+
+.products-table button:last-child {
+  background-color: #ef4444;
+  color: white;
+}
+
+.products-table button:last-child:hover {
+  background-color: #dc2626;
+}
+
+/* ===================================
+   STATUS SELECT (ORDERS)
+   =================================== */
+
+.status-select {
+  background: white;
+  min-width: 160px;
+}
+
+/* ===================================
+   PAYMENT BADGE ANIMATION
+   =================================== */
+
+.payment-badge {
+  transition: transform 0.2s ease;
+}
+
+.payment-badge:hover {
+  transform: scale(1.05);
+}
+
+/* ===================================
+   ORDER CARD IMPROVEMENTS
+   =================================== */
+
+.order-card {
+  background: #ffffff;
+}
+
+.order-items {
+  padding-left: 0.5rem;
+  border-left: 3px solid #e5e7eb;
+}
+
+/* ===================================
+   IMAGE HOVER EFFECT
+   =================================== */
+
+.product-image,
+.existing-image-preview {
+  transition: transform 0.3s ease;
+}
+
+.product-image:hover,
+.existing-image-preview:hover {
+  transform: scale(1.05);
+}
+
+/* ===================================
+   MOBILE TWEAKS
+   =================================== */
+
+@media (max-width: 480px) {
+  .pagination button {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
+  }
+
+  .products-table th,
+  .products-table td {
+    padding: 0.6rem;
+  }
+
+  .order-total {
+    font-size: 1.1rem;
+  }
+}
