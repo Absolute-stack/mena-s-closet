@@ -111,29 +111,15 @@ async function placeOrder(req, res) {
       await userModel.findByIdAndUpdate(userId, { cartData: {} });
     }
 
-    // 📱 Send SMS notification to OWNER about new order
+    // 📱 Send SHORT SMS notification to OWNER about new order
     const orderIdShort = newOrder._id.toString().slice(-8).toUpperCase();
-    const itemsList = orderItems
-      .map((item) => `- ${item.name} (${item.size}) x${item.quantity}`)
-      .join('\n');
 
-    const ownerMessage = `🛍️ NEW ORDER #${orderIdShort}
-
-Customer: ${address.firstName} ${address.lastName}
-Phone: ${address.phone}
-Email: ${address.email}
-
-Items:
-${itemsList}
-
-Delivery to:
-${address.street}
-${address.city}, ${address.state}
-
-Amount: GH₵${totalAmount.toFixed(2)}
-Status: ${paymentInfo?.status || 'Pending'}
-
-- Mena's Closet`;
+    const ownerMessage = `NEW ORDER #${orderIdShort}
+${address.firstName} ${address.lastName}
+${address.phone}
+GH₵${totalAmount.toFixed(2)}
+${orderItems.length} item(s)
+${address.city}`;
 
     await sendOwnerSMS(ownerMessage);
 
@@ -227,20 +213,13 @@ async function verifyPayment(req, res) {
 
     await order.save();
 
-    // 📱 Send SMS to OWNER confirming payment received
+    // 📱 Send SHORT SMS to OWNER confirming payment
     const orderIdShort = order._id.toString().slice(-8).toUpperCase();
-    const ownerMessage = `💰 PAYMENT CONFIRMED #${orderIdShort}
 
-Customer: ${order.shippingAddress.firstName} ${order.shippingAddress.lastName}
-Amount: GH₵${order.totalAmount.toFixed(2)}
-Phone: ${order.shippingAddress.phone}
-
-Payment Method: ${order.paymentMethod}
-Reference: ${reference}
-
-Ready to pack and ship!
-
-- Mena's Closet`;
+    const ownerMessage = `PAID #${orderIdShort}
+${order.shippingAddress.firstName} ${order.shippingAddress.lastName}
+GH₵${order.totalAmount.toFixed(2)}
+${order.shippingAddress.phone}`;
 
     await sendOwnerSMS(ownerMessage);
 
@@ -347,19 +326,13 @@ async function updateStatus(req, res) {
     // Update order status
     await orderModel.findByIdAndUpdate(orderId, { orderStatus: status });
 
-    // 📱 Send SMS to OWNER when order status changes to Delivered
+    // 📱 Send SHORT SMS to OWNER when delivered
     const orderIdShort = order._id.toString().slice(-8).toUpperCase();
 
     if (status === 'Delivered') {
-      const ownerMessage = `✅ ORDER DELIVERED #${orderIdShort}
-
-Customer: ${order.shippingAddress.firstName} ${order.shippingAddress.lastName}
-Phone: ${order.shippingAddress.phone}
-Amount: GH₵${order.totalAmount.toFixed(2)}
-
-Order completed successfully! 🎉
-
-- Mena's Closet`;
+      const ownerMessage = `DELIVERED #${orderIdShort}
+  ${order.shippingAddress.firstName} ${order.shippingAddress.lastName}
+  GH₵${order.totalAmount.toFixed(2)}`;
 
       await sendOwnerSMS(ownerMessage);
     }
