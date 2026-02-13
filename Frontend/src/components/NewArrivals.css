@@ -1,0 +1,154 @@
+/* ===============================
+   NEW ARRIVALS – DESKTOP
+================================ */
+.newarrivals .container {
+  margin-block: 4rem;
+  background-color: var(--sec-clr);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+/* MAIN GRID */
+.newarrivals-grid {
+  display: grid;
+  grid-template-columns: minmax(140px, 200px) 1fr;
+  align-items: center;
+  margin-top: 3rem;
+  gap: 2.5rem;
+}
+
+/* INTRO TEXT */
+.intro-content .info-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.intro-content .info-subtitle {
+  font-size: 0.9rem;
+  color: lightslategrey;
+  margin-top: 0.25rem;
+}
+
+/* CARD GRID */
+.card-grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+/* IMAGE WRAPPER (IMPORTANT FOR CONSISTENCY) */
+.card-grid-container img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 1rem;
+  transition: transform 0.35s ease;
+}
+
+/* Hover only on devices that support it */
+@media (hover: hover) {
+  .card-grid-container img:hover {
+    transform: scale(1.05);
+  }
+}
+
+/* ===============================
+   TABLET (≤768px)
+================================ */
+@media (max-width: 768px) {
+  .newarrivals .container {
+    margin-block: 3rem;
+    padding: 1.25rem;
+  }
+
+  .newarrivals-grid {
+    grid-template-columns: 1fr;
+    margin-top: 2rem;
+    gap: 1.75rem;
+  }
+
+  .intro-content {
+    text-align: center;
+    max-width: 500px;
+    margin-inline: auto;
+  }
+
+  .intro-content .info-title {
+    font-size: 1.2rem;
+  }
+
+  .intro-content .info-subtitle {
+    font-size: 0.85rem;
+  }
+
+  .card-grid-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.1rem;
+  }
+
+  .card-grid-container img {
+    border-radius: 0.85rem;
+  }
+}
+
+/* ===============================
+   MOBILE (≤480px)
+================================ */
+@media (max-width: 480px) {
+  .newarrivals .container {
+    margin-block: 2.5rem;
+    padding: 1rem;
+    border-radius: 0.85rem;
+  }
+
+  .newarrivals-grid {
+    margin-top: 1.5rem;
+    gap: 1.25rem;
+  }
+
+  .intro-content .info-title {
+    font-size: 1.05rem;
+  }
+
+  .intro-content .info-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .card-grid-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .card-grid-container img {
+    aspect-ratio: 2 / 3;
+    border-radius: 0.75rem;
+  }
+}
+
+/* ===============================
+   SMALL MOBILE (≤375px)
+================================ */
+@media (max-width: 375px) {
+  .newarrivals .container {
+    margin-block: 2rem;
+    padding: 0.85rem;
+  }
+
+  .intro-content .info-title {
+    font-size: 1rem;
+  }
+
+  .intro-content .info-subtitle {
+    font-size: 0.75rem;
+  }
+
+  .card-grid-container {
+    gap: 0.85rem;
+  }
+
+  .card-grid-container img {
+    border-radius: 0.65rem;
+  }
+}

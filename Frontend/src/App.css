@@ -1,0 +1,450 @@
+/* ===============================
+   MOBILE RESPONSIVE STYLES
+   Mena's Closet Ghana
+================================ */
+
+/* Base styles remain the same */
+
+li {
+  list-style: none;
+}
+
+a,
+img,
+span,
+button,
+input {
+  display: block;
+}
+
+a,
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+img {
+  height: auto;
+}
+
+button,
+input,
+select {
+  border: none;
+  outline: none;
+}
+
+button,
+select {
+  cursor: pointer;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: white;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--main-clr);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ===============================
+   UTILITY CLASSES
+================================ */
+.container {
+  max-width: 85rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+.flex {
+  display: flex;
+  align-items: center;
+}
+
+.flex-sb {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.gap {
+  gap: 0.5rem;
+}
+
+.gap1 {
+  gap: 1rem;
+}
+
+.gap15 {
+  gap: 1.5rem;
+}
+
+.gap2 {
+  gap: 2rem;
+}
+
+.skeleton-block {
+  width: 100%;
+  height: 120px;
+  border-radius: 12px;
+  background: linear-gradient(100deg, #e5e7eb 40%, #f3f4f6 50%, #e5e7eb 60%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ===============================
+   PAGE NAVIGATION
+================================ */
+.page-nav {
+  padding-block: 1rem;
+}
+
+.page-nav p {
+  font-size: 0.9rem;
+  display: flex;
+  gap: 0.2rem;
+  color: rgb(80, 83, 86);
+  transition: 0.3s ease;
+}
+
+.page-nav .home-link {
+  transition: 0.3s ease;
+}
+
+.page-nav .home-link:where(:hover, :focus-visible) {
+  color: black;
+}
+
+.page-nav span {
+  position: relative;
+  color: black;
+  cursor: pointer;
+  text-transform: capitalize;
+}
+
+.page-nav span::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 0;
+  width: 0%;
+  height: 2px;
+  border-radius: 2px;
+  background: black;
+  transition: 0.3s ease;
+  transform-origin: left;
+}
+
+.page-nav span:where(:hover, :focus-visible)::after {
+  width: 100%;
+}
+
+/* ===============================
+   GENERAL STYLING
+================================ */
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--main-ff);
+  font-size: 1rem;
+  line-height: 1.5;
+  background-color: var(--bg-clr);
+}
+
+/* ===============================
+   SHOP BY CATEGORY
+================================ */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-block-start: 2rem;
+  border-radius: 2rem;
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  height: 450px;
+  border-radius: 2rem;
+  transition: 0.25s ease-out;
+}
+
+.card:where(:hover, :focus-visible) {
+  transform: scale(1.01);
+  cursor: pointer;
+}
+
+.card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 2rem;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 1),
+    rgba(0, 0, 0, 0.1)
+  );
+  border-radius: 2rem;
+}
+
+.card-content {
+  position: absolute;
+  left: 25px;
+  bottom: 15px;
+  color: var(--accent-clr);
+  font-weight: 700;
+  z-index: 2;
+}
+
+/* ===============================
+   TITLE CONTAINER
+================================ */
+.title-container {
+  margin-block-start: 2rem;
+}
+
+.titles-containers {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.shop-subtitle {
+  color: lightslategrey;
+}
+
+.view {
+  color: var(--main-clr);
+  transition: 0.4s ease;
+}
+
+.view:where(:hover, :focus-visible) {
+  transform: translateX(4px);
+  cursor: pointer;
+}
+
+.view span {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.5rem;
+}
+
+/* ===============================
+   LIMITED SALES OFFER
+================================ */
+.limited-sale-offer {
+  width: 100%;
+  max-width: 500px;
+  height: 200px;
+  margin-block-start: 2rem;
+  background-image: linear-gradient(to right, #d4744e, #d4744e3c);
+  padding: 1rem;
+  color: var(--sec-clr);
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: 0.4s ease;
+}
+
+.limited-sale-offer:where(:hover, :focus-visible) {
+  transform: scale(1.05);
+}
+
+.limited-tag {
+  color: var(--main-clr);
+  padding: 0.4rem;
+  background-color: var(--sec-clr);
+  max-width: max-content;
+  border-radius: 0.5rem;
+  font-weight: 700;
+}
+
+.sale-title {
+  font-size: 1.7rem;
+  font-weight: 700;
+}
+
+.shop-details {
+  background-color: transparent;
+  color: var(--sec-clr);
+  text-decoration: underline;
+  margin-block-start: 1rem;
+}
+
+/* ===============================
+   TABLET BREAKPOINT (768px)
+================================ */
+@media (max-width: 768px) {
+  .container {
+    padding-inline: 1rem;
+  }
+
+  /* Category Grid */
+  .category-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .card {
+    height: 350px;
+  }
+
+  .card-content {
+    left: 20px;
+    bottom: 20px;
+    font-size: 1.2rem;
+  }
+
+  /* Title Container */
+  .shop-subtitle {
+    font-size: 0.85rem;
+  }
+
+  /* Limited Offer */
+  .limited-sale-offer {
+    max-width: 100%;
+    height: 180px;
+  }
+
+  .sale-title {
+    font-size: 1.4rem;
+  }
+}
+
+/* ===============================
+   MOBILE BREAKPOINT (480px)
+================================ */
+@media (max-width: 480px) {
+  /* Typography adjustments */
+  .shop-title {
+    font-size: 1.3rem;
+  }
+
+  .shop-subtitle {
+    font-size: 0.8rem;
+  }
+
+  /* Category Cards */
+  .card {
+    height: 280px;
+    border-radius: 1rem;
+  }
+
+  .card img {
+    border-radius: 1rem;
+  }
+
+  .card::before {
+    border-radius: 1rem;
+  }
+
+  .card-content {
+    left: 15px;
+    bottom: 15px;
+    font-size: 1rem;
+  }
+
+  /* Limited Offer */
+  .limited-sale-offer {
+    height: 160px;
+    padding: 0.75rem;
+  }
+
+  .limited-tag {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .sale-title {
+    font-size: 1.1rem;
+    margin-block-start: 0.5rem;
+  }
+
+  .limited-sale-offer p {
+    font-size: 0.85rem;
+  }
+
+  .shop-details {
+    font-size: 0.85rem;
+    margin-block-start: 0.75rem;
+  }
+
+  /* Page Navigation */
+  .page-nav p {
+    font-size: 0.8rem;
+  }
+
+  /* Gap utilities for mobile */
+  .gap {
+    gap: 0.3rem;
+  }
+
+  .gap1 {
+    gap: 0.75rem;
+  }
+
+  .gap2 {
+    gap: 1.5rem;
+  }
+}
+
+/* ===============================
+   SMALL MOBILE (320px)
+================================ */
+@media (max-width: 375px) {
+  .container {
+    padding-inline: 0.75rem;
+  }
+
+  .card {
+    height: 240px;
+  }
+
+  .card-content {
+    font-size: 0.9rem;
+    left: 12px;
+    bottom: 12px;
+  }
+
+  .limited-sale-offer {
+    height: 140px;
+  }
+
+  .sale-title {
+    font-size: 1rem;
+  }
+}
