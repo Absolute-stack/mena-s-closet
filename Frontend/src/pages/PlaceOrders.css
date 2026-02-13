@@ -416,12 +416,13 @@
 /* ===============================
    LARGE DESKTOP (≥1400px)
 ================================ */
-@media (min-width: 1400px) {
+@media (min-width: 1024px) {
   .placeOrders-section .wrapper {
-    gap: 4rem;
-  }
+    flex-direction: row;
+    gap: 3rem;
+    align-items: flex-start;
 
-  .order-map-section {
-    max-width: 450px;
+    max-width: 1200px;
+    margin: 0 auto;
   }
 }
