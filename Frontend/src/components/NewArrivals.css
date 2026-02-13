@@ -104,14 +104,15 @@
   }
 
   .card-grid-container .product-item {
-    width: 300px;
+    width: 315px;
     height: 400px;
+    margin-inline: auto;
     overflow: hidden;
   }
 
   .card-grid-container .product-item img {
     width: 100%;
-    height: 100%;
+    height: 380px;
     object-fit: cover;
     border-radius: 1rem;
     transition: transform 0.35s ease;
