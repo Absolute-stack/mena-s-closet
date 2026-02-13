@@ -398,6 +398,10 @@
   .order-delivery {
     font-size: 1rem;
   }
+  .order-subtotal span,
+  .order-delivery span {
+    color: #fff;
+  }
 
   .total-amount {
     font-size: 1.3rem;
@@ -421,7 +425,6 @@
     flex-direction: row;
     gap: 3rem;
     align-items: flex-start;
-
     max-width: 1200px;
     margin: 0 auto;
   }

@@ -429,7 +429,7 @@ function PlaceOrders() {
                         Size: {item.size} | Qty: {item.quantity}
                       </p>
                     </div>
-                    <p style={{ fontWeight: '600' }}>
+                    <p style={{ fontWeight: '600', color: '#fff' }}>
                       {currency}
                       {(item.price * item.quantity).toFixed(2)}
                     </p>

@@ -196,23 +196,33 @@ function Cart() {
 
 const emptyCartStyles = {
   container: {
+    minHeight: '60vh', // gives vertical space (not too tall on mobile)
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center', // vertical center
+    alignItems: 'center', // horizontal center
     textAlign: 'center',
-    padding: '60px 20px',
+    padding: 'clamp(40px, 8vw, 80px) 20px',
+    maxWidth: '900px',
+    margin: '0 auto',
   },
+
   icon: {
-    fontSize: '80px',
-    marginBottom: '20px',
+    fontSize: 'clamp(50px, 10vw, 90px)',
+    marginBottom: 'clamp(16px, 3vw, 28px)',
   },
+
   button: {
-    marginTop: '20px',
-    padding: '12px 32px',
+    marginTop: 'clamp(16px, 3vw, 28px)',
+    padding: 'clamp(10px, 2vw, 14px) clamp(24px, 5vw, 36px)',
     backgroundColor: '#ffa17c',
     color: 'white',
     border: 'none',
     borderRadius: '8px',
-    fontSize: '16px',
+    fontSize: 'clamp(14px, 2vw, 17px)',
     fontWeight: '500',
     cursor: 'pointer',
+    minWidth: '160px',
   },
 };
 
