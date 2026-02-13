@@ -31,6 +31,15 @@ export default function AdminDashboard() {
     image4: null,
   });
 
+  // Search & Pagination State
+  const [searchQueryProducts, setSearchQueryProducts] = useState('');
+  const [currentPageProducts, setCurrentPageProducts] = useState(1);
+  const itemsPerPageProducts = 5;
+
+  const [searchQueryOrders, setSearchQueryOrders] = useState('');
+  const [currentPageOrders, setCurrentPageOrders] = useState(1);
+  const itemsPerPageOrders = 5;
+
   useEffect(() => {
     if (token) {
       fetchProducts();
@@ -38,6 +47,7 @@ export default function AdminDashboard() {
     }
   }, [token]);
 
+  // ----------- Login / Logout ----------
   const handleLogin = async () => {
     setLoading(true);
     try {
@@ -66,6 +76,7 @@ export default function AdminDashboard() {
     localStorage.removeItem('adminToken');
   };
 
+  // ----------- Fetch Data ----------
   const fetchProducts = async () => {
     try {
       const response = await fetch(`${API_URL}/product/list`);
@@ -88,22 +99,19 @@ export default function AdminDashboard() {
     }
   };
 
+  // ----------- Product CRUD ----------
   const handleAddProduct = async () => {
     setLoading(true);
     try {
       const formData = new FormData();
       Object.keys(productForm).forEach((key) => {
-        if (key === 'sizes') {
+        if (key === 'sizes')
           formData.append(key, JSON.stringify(productForm[key]));
-        } else {
-          formData.append(key, productForm[key]);
-        }
+        else formData.append(key, productForm[key]);
       });
-
-      Object.keys(images).forEach((key) => {
-        if (images[key]) formData.append(key, images[key]);
-      });
-
+      Object.keys(images).forEach(
+        (key) => images[key] && formData.append(key, images[key]),
+      );
       const response = await fetch(`${API_URL}/product/add`, {
         method: 'POST',
         credentials: 'include',
@@ -114,9 +122,7 @@ export default function AdminDashboard() {
         alert('Product added!');
         fetchProducts();
         resetForm();
-      } else {
-        alert(data.message);
-      }
+      } else alert(data.message);
     } catch (error) {
       alert('Failed to add product');
     }
@@ -129,19 +135,14 @@ export default function AdminDashboard() {
     try {
       const formData = new FormData();
       formData.append('id', editingProduct._id);
-
       Object.keys(productForm).forEach((key) => {
-        if (key === 'sizes') {
+        if (key === 'sizes')
           formData.append(key, JSON.stringify(productForm[key]));
-        } else {
-          formData.append(key, productForm[key]);
-        }
+        else formData.append(key, productForm[key]);
       });
-
-      Object.keys(images).forEach((key) => {
-        if (images[key]) formData.append(key, images[key]);
-      });
-
+      Object.keys(images).forEach(
+        (key) => images[key] && formData.append(key, images[key]),
+      );
       const response = await fetch(`${API_URL}/product/update`, {
         method: 'POST',
         credentials: 'include',
@@ -154,9 +155,7 @@ export default function AdminDashboard() {
         resetForm();
         setEditingProduct(null);
         setActiveTab('products');
-      } else {
-        alert(data.message);
-      }
+      } else alert(data.message);
     } catch (error) {
       alert('Failed to update product');
     }
@@ -177,12 +176,7 @@ export default function AdminDashboard() {
       sizes: product.sizes,
       stock: product.stock,
     });
-    setImages({
-      image1: null,
-      image2: null,
-      image3: null,
-      image4: null,
-    });
+    setImages({ image1: null, image2: null, image3: null, image4: null });
     setActiveTab('add-product');
   };
 
@@ -223,6 +217,7 @@ export default function AdminDashboard() {
     }
   };
 
+  // ----------- Form Helpers ----------
   const toggleSize = (size) => {
     setProductForm((prev) => ({
       ...prev,
@@ -254,7 +249,37 @@ export default function AdminDashboard() {
     setEditingProduct(null);
   };
 
-  // LOGIN PAGE
+  // ----------- Filtered & Paginated Products ----------
+  const filteredProducts = products.filter(
+    (p) =>
+      p.name.toLowerCase().includes(searchQueryProducts.toLowerCase()) ||
+      p.category.toLowerCase().includes(searchQueryProducts.toLowerCase()),
+  );
+  const totalPagesProducts = Math.ceil(
+    filteredProducts.length / itemsPerPageProducts,
+  );
+  const displayedProducts = filteredProducts.slice(
+    (currentPageProducts - 1) * itemsPerPageProducts,
+    currentPageProducts * itemsPerPageProducts,
+  );
+
+  // ----------- Filtered & Paginated Orders ----------
+  const filteredOrders = orders.filter(
+    (o) =>
+      o._id.toLowerCase().includes(searchQueryOrders.toLowerCase()) ||
+      (o.userId?.name || 'Guest')
+        .toLowerCase()
+        .includes(searchQueryOrders.toLowerCase()),
+  );
+  const totalPagesOrders = Math.ceil(
+    filteredOrders.length / itemsPerPageOrders,
+  );
+  const displayedOrders = filteredOrders.slice(
+    (currentPageOrders - 1) * itemsPerPageOrders,
+    currentPageOrders * itemsPerPageOrders,
+  );
+
+  // ----------- LOGIN PAGE ----------
   if (!token) {
     return (
       <div className="login-container">
@@ -288,7 +313,7 @@ export default function AdminDashboard() {
     );
   }
 
-  // MAIN DASHBOARD
+  // ----------- MAIN DASHBOARD ----------
   return (
     <div>
       {/* Header */}
@@ -301,25 +326,38 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="admin-main">
-        {/* Tabs */}
-        <div className="tabs-container">
-          {['products', 'add-product', 'orders'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`tab-button ${activeTab === tab ? 'active' : ''}`}
-            >
-              {tab.replace('-', ' ')}
-            </button>
-          ))}
-        </div>
+      {/* Tabs */}
+      <div className="tabs-container">
+        {['products', 'add-product', 'orders'].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`tab-button ${activeTab === tab ? 'active' : ''}`}
+          >
+            {tab.replace('-', ' ')}
+          </button>
+        ))}
+      </div>
 
-        {/* Products List */}
+      <div className="admin-main">
+        {/* ------------------ PRODUCTS ------------------ */}
         {activeTab === 'products' && (
           <div className="content-card">
             <h2 className="card-title">Products ({products.length})</h2>
+
+            {/* Search */}
+            <input
+              type="text"
+              placeholder="Search by name or category..."
+              value={searchQueryProducts}
+              onChange={(e) => {
+                setSearchQueryProducts(e.target.value);
+                setCurrentPageProducts(1);
+              }}
+              className="search-input"
+            />
+
+            {/* Products Table */}
             <div className="table-wrapper">
               <table className="products-table">
                 <thead>
@@ -333,12 +371,11 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {products.map((product) => (
+                  {displayedProducts.map((product) => (
                     <tr key={product._id}>
                       <td>
                         <img
                           src={product.images[0]}
-                          alt=""
                           className="product-image"
                         />
                       </td>
@@ -347,15 +384,11 @@ export default function AdminDashboard() {
                       <td>GH₵{product.price}</td>
                       <td>{product.stock}</td>
                       <td>
-                        <button
-                          onClick={() => handleEditProduct(product)}
-                          className="edit-button"
-                        >
+                        <button onClick={() => handleEditProduct(product)}>
                           Edit
                         </button>
                         <button
                           onClick={() => handleDeleteProduct(product._id)}
-                          className="delete-button"
                         >
                           Delete
                         </button>
@@ -365,10 +398,43 @@ export default function AdminDashboard() {
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination */}
+            <div className="pagination">
+              <button
+                onClick={() =>
+                  setCurrentPageProducts((p) => Math.max(p - 1, 1))
+                }
+                disabled={currentPageProducts === 1}
+              >
+                Prev
+              </button>
+              {[...Array(totalPagesProducts)].map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentPageProducts(idx + 1)}
+                  className={
+                    currentPageProducts === idx + 1 ? 'active-page' : ''
+                  }
+                >
+                  {idx + 1}
+                </button>
+              ))}
+              <button
+                onClick={() =>
+                  setCurrentPageProducts((p) =>
+                    Math.min(p + 1, totalPagesProducts),
+                  )
+                }
+                disabled={currentPageProducts === totalPagesProducts}
+              >
+                Next
+              </button>
+            </div>
           </div>
         )}
 
-        {/* Add/Edit Product Form */}
+        {/* ------------------ ADD/EDIT PRODUCT ------------------ */}
         {activeTab === 'add-product' && (
           <div className="content-card">
             <h2 className="card-title">
@@ -386,7 +452,9 @@ export default function AdminDashboard() {
               </div>
             )}
 
+            {/* Product Form */}
             <div className="form-container">
+              {/* Name & Price */}
               <div className="form-row">
                 <input
                   type="text"
@@ -408,6 +476,7 @@ export default function AdminDashboard() {
                 />
               </div>
 
+              {/* Description */}
               <textarea
                 placeholder="Description"
                 value={productForm.desc}
@@ -417,6 +486,7 @@ export default function AdminDashboard() {
                 className="form-textarea"
               />
 
+              {/* Category / Subcategory / Stock */}
               <div className="form-row">
                 <input
                   type="text"
@@ -450,6 +520,7 @@ export default function AdminDashboard() {
                 />
               </div>
 
+              {/* Gender */}
               <div>
                 <label className="form-label">Gender</label>
                 <select
@@ -465,6 +536,7 @@ export default function AdminDashboard() {
                 </select>
               </div>
 
+              {/* Sizes */}
               <div>
                 <label className="form-label">Sizes</label>
                 <div className="size-selector">
@@ -473,9 +545,7 @@ export default function AdminDashboard() {
                       key={size}
                       type="button"
                       onClick={() => toggleSize(size)}
-                      className={`size-button ${
-                        productForm.sizes.includes(size) ? 'selected' : ''
-                      }`}
+                      className={`size-button ${productForm.sizes.includes(size) ? 'selected' : ''}`}
                     >
                       {size}
                     </button>
@@ -483,6 +553,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
+              {/* Checkboxes */}
               <div className="checkbox-group">
                 <label className="checkbox-label">
                   <input
@@ -514,6 +585,7 @@ export default function AdminDashboard() {
                 </label>
               </div>
 
+              {/* Images */}
               <div>
                 <label className="form-label">
                   {editingProduct
@@ -569,12 +641,25 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Orders */}
+        {/* ------------------ ORDERS ------------------ */}
         {activeTab === 'orders' && (
           <div className="content-card">
             <h2 className="card-title">Orders ({orders.length})</h2>
+
+            {/* Search Orders */}
+            <input
+              type="text"
+              placeholder="Search by order ID or customer name..."
+              value={searchQueryOrders}
+              onChange={(e) => {
+                setSearchQueryOrders(e.target.value);
+                setCurrentPageOrders(1);
+              }}
+              className="search-input"
+            />
+
             <div className="orders-container">
-              {orders.map((order) => (
+              {displayedOrders.map((order) => (
                 <div key={order._id} className="order-card">
                   <div className="order-header">
                     <div>
@@ -614,15 +699,40 @@ export default function AdminDashboard() {
                       <option value="Delivered">Delivered</option>
                     </select>
                     <span
-                      className={`payment-badge ${
-                        order.paymentStatus === 'Paid' ? 'paid' : 'pending'
-                      }`}
+                      className={`payment-badge ${order.paymentStatus === 'Paid' ? 'paid' : 'pending'}`}
                     >
                       {order.paymentStatus}
                     </span>
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Pagination for Orders */}
+            <div className="pagination">
+              <button
+                onClick={() => setCurrentPageOrders((p) => Math.max(p - 1, 1))}
+                disabled={currentPageOrders === 1}
+              >
+                Prev
+              </button>
+              {[...Array(totalPagesOrders)].map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentPageOrders(idx + 1)}
+                  className={currentPageOrders === idx + 1 ? 'active-page' : ''}
+                >
+                  {idx + 1}
+                </button>
+              ))}
+              <button
+                onClick={() =>
+                  setCurrentPageOrders((p) => Math.min(p + 1, totalPagesOrders))
+                }
+                disabled={currentPageOrders === totalPagesOrders}
+              >
+                Next
+              </button>
             </div>
           </div>
         )}
