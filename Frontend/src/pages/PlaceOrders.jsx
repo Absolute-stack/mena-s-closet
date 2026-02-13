@@ -152,7 +152,7 @@ function PlaceOrders() {
         amount: totalAmount,
       });
 
-      const handler = PaystackPop.setup({
+      const handler = new PaystackPop({
         key: PAYSTACK_KEY,
         email: address.email,
         amount: totalAmount * 100, // Convert to pesewas
@@ -181,7 +181,7 @@ function PlaceOrders() {
         },
       });
 
-      handler.openIframe();
+      handler.open();
     } catch (error) {
       console.error('Checkout error:', error);
       toast.error('Failed to initialize payment');
