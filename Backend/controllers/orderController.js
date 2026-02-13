@@ -110,40 +110,28 @@ async function verifyPayment(req, res) {
   try {
     const { reference, orderData } = req.body;
 
-    if (!reference || !orderData) {
-      return res.status(400).json({
-        success: false,
-        message: 'Reference and order data are required',
-      });
-    }
+    if (!reference || !orderData)
+      return res
+        .status(400)
+        .json({ success: false, message: 'Reference and order data required' });
 
-    // 🔐 Verify Paystack
+    // Verify Paystack
     const paystackResponse = await fetch(
       `https://api.paystack.co/transaction/verify/${reference}`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.PAYSTACK_SECRET}`,
-        },
-      },
+      { headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET}` } },
     );
-
     const paystackData = await paystackResponse.json();
 
-    if (!paystackData.status || paystackData.data.status !== 'success') {
-      return res.status(400).json({
-        success: false,
-        message: 'Payment not successful',
-      });
-    }
+    if (!paystackData.status || paystackData.data.status !== 'success')
+      return res
+        .status(400)
+        .json({ success: false, message: 'Payment not successful' });
 
     const paymentData = paystackData.data;
-
-    if (paymentData.amount !== orderData.totalAmount * 100) {
-      return res.status(400).json({
-        success: false,
-        message: 'Amount mismatch',
-      });
-    }
+    if (paymentData.amount !== orderData.totalAmount * 100)
+      return res
+        .status(400)
+        .json({ success: false, message: 'Amount mismatch' });
 
     // ✅ Create order
     const order = await orderModel.create({
@@ -162,19 +150,23 @@ async function verifyPayment(req, res) {
       },
     });
 
-    // 📉 Reduce stock
-    for (const item of order.items) {
-      await productModel.findByIdAndUpdate(item.productId, {
-        $inc: { stock: -item.quantity },
-      });
-    }
+    // Reduce stock in parallel
+    await Promise.all(
+      order.items.map((item) =>
+        productModel.findByIdAndUpdate(item.productId, {
+          $inc: { stock: -item.quantity },
+        }),
+      ),
+    );
 
-    // 🧹 Clear user cart
+    // Clear user cart if logged in
     if (order.userId) {
-      await userModel.findByIdAndUpdate(order.userId, { cartData: {} });
+      userModel
+        .findByIdAndUpdate(order.userId, { cartData: {} })
+        .catch(console.error);
     }
 
-    // 📲 Send SMS (call helper)
+    // Send SMS asynchronously
     sendOrderSMS(order);
 
     return res.json({
@@ -184,12 +176,12 @@ async function verifyPayment(req, res) {
     });
   } catch (error) {
     console.error('Verify payment error:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Payment verification failed',
-    });
+    return res
+      .status(500)
+      .json({ success: false, message: 'Payment verification failed' });
   }
 }
+
 // Get all orders (Admin)
 async function allOrders(req, res) {
   try {
