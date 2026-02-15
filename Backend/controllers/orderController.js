@@ -4,7 +4,7 @@ import productModel from '../models/productModel.js';
 import axios from 'axios';
 
 // 📱 SMS Notification Function (Hubtel)
-async function sendOrderSMS(order, customerName) {
+async function sendOrderSMS(order) {
   try {
     if (!process.env.HUBTEL_CLIENT_ID || !process.env.HUBTEL_CLIENT_SECRET) {
       console.log('⚠️ Hubtel credentials not configured, skipping SMS');
@@ -12,13 +12,45 @@ async function sendOrderSMS(order, customerName) {
     }
 
     const orderId = order._id.toString().slice(-6).toUpperCase();
-    const message = `New Order Alert! 
+
+    // Get customer details
+    let customerName = 'Guest Customer';
+    let customerPhone = order.shippingAddress?.phone || 'N/A';
+
+    if (order.userId) {
+      const user = await userModel.findById(order.userId).select('name');
+      customerName = user?.name || 'Guest Customer';
+    }
+
+    // Build items list
+    const itemsList = order.items
+      .map(
+        (item) =>
+          `- ${item.name} (x${item.quantity}) GH₵${(item.price * item.quantity).toFixed(2)}`,
+      )
+      .join('\n');
+
+    const message = `NEW PAID ORDER! 
+
 Order #${orderId}
-Customer: ${customerName || 'Guest'}
+
+CUSTOMER:
+Name: ${customerName}
+Phone: ${customerPhone}
+
+ITEMS ORDERED:
+${itemsList}
+
+DELIVERY ADDRESS:
+${order.shippingAddress.street}
+${order.shippingAddress.city}, ${order.shippingAddress.state}
+
+PAYMENT:
 Amount: GH₵${order.totalAmount.toFixed(2)}
-Items: ${order.items.length}
-Payment: ${order.paymentStatus}
-Check your admin panel.`;
+Status: ${order.paymentStatus}
+Method: ${order.paymentMethod}
+
+Check your admin panel to process.`;
 
     // Create Basic Auth credentials (Base64 encoded)
     const credentials = Buffer.from(
@@ -128,21 +160,7 @@ async function placeOrder(req, res) {
       await userModel.findByIdAndUpdate(userId, { cartData: {} });
     }
 
-    // 📱 Send SMS notification (non-blocking)
-    setImmediate(async () => {
-      try {
-        let customerName = null;
-
-        if (userId) {
-          const user = await userModel.findById(userId).select('name');
-          customerName = user?.name;
-        }
-
-        await sendOrderSMS(newOrder, customerName);
-      } catch (smsError) {
-        console.error('SMS notification error:', smsError.message);
-      }
-    });
+    // NO SMS SENT HERE - Only sent after payment verification
 
     res.status(201).json({
       success: true,
@@ -222,12 +240,22 @@ async function verifyPayment(req, res) {
       });
     }
 
+    // ✅ Update order
     order.paymentStatus = 'Paid';
     order.paymentInfo.reference = reference;
     order.paymentInfo.verifiedAt = new Date();
     order.paymentInfo.paystackTransactionId = paymentData.id;
 
     await order.save();
+
+    // 📱 Send SMS notification AFTER successful payment verification (non-blocking)
+    setImmediate(async () => {
+      try {
+        await sendOrderSMS(order);
+      } catch (smsError) {
+        console.error('SMS notification error:', smsError.message);
+      }
+    });
 
     return res.json({
       success: true,
