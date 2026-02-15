@@ -3,17 +3,16 @@ import userModel from '../models/userModel.js';
 import productModel from '../models/productModel.js';
 import axios from 'axios';
 
-// 📱 SMS Notification Function (Arkesel)
+// 📱 SMS Notification Function (Hubtel)
 async function sendOrderSMS(order, customerName) {
   try {
-    // Skip if no API key configured
-    if (!process.env.ARKESEL_API_KEY) {
-      console.log('⚠️ Arkesel API key not configured, skipping SMS');
+    if (!process.env.HUBTEL_CLIENT_ID || !process.env.HUBTEL_CLIENT_SECRET) {
+      console.log('⚠️ Hubtel credentials not configured, skipping SMS');
       return;
     }
 
     const orderId = order._id.toString().slice(-6).toUpperCase();
-    const message = `New Order Alert! 🛒
+    const message = `New Order Alert! 
 Order #${orderId}
 Customer: ${customerName || 'Guest'}
 Amount: GH₵${order.totalAmount.toFixed(2)}
@@ -21,22 +20,35 @@ Items: ${order.items.length}
 Payment: ${order.paymentStatus}
 Check your admin panel.`;
 
-    await axios.post(
-      'https://sms.arkesel.com/api/v2/sms/send',
-      {
-        sender: process.env.ARKESEL_SENDER_ID || 'Arkesel',
-        message: message,
-        recipients: [process.env.OWNER_PHONE_NUMBER],
-      },
+    // Create Basic Auth credentials (Base64 encoded)
+    const credentials = Buffer.from(
+      `${process.env.HUBTEL_CLIENT_ID}:${process.env.HUBTEL_CLIENT_SECRET}`,
+    ).toString('base64');
+
+    const requestData = {
+      to: process.env.OWNER_PHONE_NUMBER,
+      content: message,
+    };
+
+    // Only include 'from' if sender ID is provided
+    if (process.env.HUBTEL_SENDER_ID?.trim()) {
+      requestData.from = process.env.HUBTEL_SENDER_ID.trim();
+    }
+
+    console.log('📤 Sending SMS via Hubtel...');
+
+    const response = await axios.post(
+      'https://smsc.hubtel.com/v1/messages/send',
+      requestData,
       {
         headers: {
-          'api-key': process.env.ARKESEL_API_KEY,
+          Authorization: `Basic ${credentials}`,
           'Content-Type': 'application/json',
         },
       },
     );
 
-    console.log('✅ SMS notification sent successfully');
+    console.log('✅ SMS notification sent successfully:', response.data);
   } catch (error) {
     console.error(
       '❌ SMS notification failed:',
@@ -49,7 +61,7 @@ Check your admin panel.`;
 async function placeOrder(req, res) {
   try {
     const { items, address, paymentInfo } = req.body;
-    const userId = req.userId; // may be undefined for guests
+    const userId = req.userId;
 
     if (!items || !address) {
       return res.status(400).json({
@@ -58,7 +70,6 @@ async function placeOrder(req, res) {
       });
     }
 
-    // Validate items and calculate subtotal
     let subtotal = 0;
     const orderItems = [];
 
@@ -90,18 +101,16 @@ async function placeOrder(req, res) {
 
       subtotal += product.price * item.quantity;
 
-      // Update product stock
       await productModel.findByIdAndUpdate(product._id, {
         $inc: { stock: -item.quantity },
       });
     }
 
-    const deliveryFee = 0; // Free delivery or set your fee
+    const deliveryFee = 0;
     const totalAmount = subtotal + deliveryFee;
 
-    // Create order
     const orderData = {
-      userId: userId || null, // null for guest orders
+      userId: userId || null,
       items: orderItems,
       shippingAddress: address,
       paymentMethod: paymentInfo?.method || 'Paystack',
@@ -115,7 +124,6 @@ async function placeOrder(req, res) {
     const newOrder = new orderModel(orderData);
     await newOrder.save();
 
-    // Clear cart for authenticated users
     if (userId) {
       await userModel.findByIdAndUpdate(userId, { cartData: {} });
     }
@@ -162,7 +170,6 @@ async function verifyPayment(req, res) {
       });
     }
 
-    // 🔐 Verify transaction with Paystack using native fetch
     const paystackResponse = await fetch(
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
@@ -185,7 +192,6 @@ async function verifyPayment(req, res) {
 
     const paymentData = paystackData.data;
 
-    // 🔎 Find the order
     let order;
     if (orderId) {
       order = await orderModel.findById(orderId);
@@ -202,7 +208,6 @@ async function verifyPayment(req, res) {
       });
     }
 
-    // 🛡 Extra security: Verify amount (Paystack sends amount in pesewas)
     if (paymentData.amount !== order.totalAmount * 100) {
       return res.status(400).json({
         success: false,
@@ -210,7 +215,6 @@ async function verifyPayment(req, res) {
       });
     }
 
-    // 🛡 Optional: Verify currency
     if (paymentData.currency !== 'GHS') {
       return res.status(400).json({
         success: false,
@@ -218,7 +222,6 @@ async function verifyPayment(req, res) {
       });
     }
 
-    // ✅ Update order only after successful verification
     order.paymentStatus = 'Paid';
     order.paymentInfo.reference = reference;
     order.paymentInfo.verifiedAt = new Date();
@@ -316,7 +319,6 @@ async function updateStatus(req, res) {
       });
     }
 
-    // Get the order before updating
     const order = await orderModel.findById(orderId);
 
     if (!order) {
@@ -326,7 +328,6 @@ async function updateStatus(req, res) {
       });
     }
 
-    // Update order status
     await orderModel.findByIdAndUpdate(orderId, { orderStatus: status });
 
     res.json({
