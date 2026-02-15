@@ -1,38 +1,47 @@
 import orderModel from '../models/orderModel.js';
 import userModel from '../models/userModel.js';
 import productModel from '../models/productModel.js';
-import twilio from 'twilio';
+import axios from 'axios';
 
-// Initialize Twilio client
-const twilioClient = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN,
-);
-
-// Owner/Admin phone number (add this to your .env)
-const OWNER_PHONE_NUMBER = process.env.OWNER_PHONE_NUMBER; // Owner's phone number
-const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER; // Your Twilio number
-
-// Helper function to send SMS to owner
-async function sendOwnerSMS(message) {
+// 📱 SMS Notification Function (Arkesel)
+async function sendOrderSMS(order, customerName) {
   try {
-    if (!TWILIO_PHONE_NUMBER || !OWNER_PHONE_NUMBER) {
-      console.log('Twilio not configured. Message would be:', message);
+    // Skip if no API key configured
+    if (!process.env.ARKESEL_API_KEY) {
+      console.log('⚠️ Arkesel API key not configured, skipping SMS');
       return;
     }
 
-    const result = await twilioClient.messages.create({
-      body: message,
-      from: TWILIO_PHONE_NUMBER,
-      to: OWNER_PHONE_NUMBER,
-    });
+    const orderId = order._id.toString().slice(-6).toUpperCase();
+    const message = `New Order Alert! 🛒
+Order #${orderId}
+Customer: ${customerName || 'Guest'}
+Amount: GH₵${order.totalAmount.toFixed(2)}
+Items: ${order.items.length}
+Payment: ${order.paymentStatus}
+Check your admin panel.`;
 
-    console.log('SMS sent to owner successfully:', result.sid);
-    return result;
+    await axios.post(
+      'https://sms.arkesel.com/api/v2/sms/send',
+      {
+        sender: process.env.ARKESEL_SENDER_ID || 'Arkesel',
+        message: message,
+        recipients: [process.env.OWNER_PHONE_NUMBER],
+      },
+      {
+        headers: {
+          'api-key': process.env.ARKESEL_API_KEY,
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+
+    console.log('✅ SMS notification sent successfully');
   } catch (error) {
-    console.error('SMS error:', error.message);
-    // Don't fail the order if SMS fails
-    return null;
+    console.error(
+      '❌ SMS notification failed:',
+      error.response?.data || error.message,
+    );
   }
 }
 
@@ -111,17 +120,21 @@ async function placeOrder(req, res) {
       await userModel.findByIdAndUpdate(userId, { cartData: {} });
     }
 
-    // 📱 Send SHORT SMS notification to OWNER about new order
-    const orderIdShort = newOrder._id.toString().slice(-8).toUpperCase();
+    // 📱 Send SMS notification (non-blocking)
+    setImmediate(async () => {
+      try {
+        let customerName = null;
 
-    const ownerMessage = `NEW ORDER #${orderIdShort}
-${address.firstName} ${address.lastName}
-${address.phone}
-GH₵${totalAmount.toFixed(2)}
-${orderItems.length} item(s)
-${address.city}`;
+        if (userId) {
+          const user = await userModel.findById(userId).select('name');
+          customerName = user?.name;
+        }
 
-    await sendOwnerSMS(ownerMessage);
+        await sendOrderSMS(newOrder, customerName);
+      } catch (smsError) {
+        console.error('SMS notification error:', smsError.message);
+      }
+    });
 
     res.status(201).json({
       success: true,
@@ -212,16 +225,6 @@ async function verifyPayment(req, res) {
     order.paymentInfo.paystackTransactionId = paymentData.id;
 
     await order.save();
-
-    // 📱 Send SHORT SMS to OWNER confirming payment
-    const orderIdShort = order._id.toString().slice(-8).toUpperCase();
-
-    const ownerMessage = `PAID #${orderIdShort}
-${order.shippingAddress.firstName} ${order.shippingAddress.lastName}
-GH₵${order.totalAmount.toFixed(2)}
-${order.shippingAddress.phone}`;
-
-    await sendOwnerSMS(ownerMessage);
 
     return res.json({
       success: true,
@@ -325,17 +328,6 @@ async function updateStatus(req, res) {
 
     // Update order status
     await orderModel.findByIdAndUpdate(orderId, { orderStatus: status });
-
-    // 📱 Send SHORT SMS to OWNER when delivered
-    const orderIdShort = order._id.toString().slice(-8).toUpperCase();
-
-    if (status === 'Delivered') {
-      const ownerMessage = `DELIVERED #${orderIdShort}
-  ${order.shippingAddress.firstName} ${order.shippingAddress.lastName}
-  GH₵${order.totalAmount.toFixed(2)}`;
-
-      await sendOwnerSMS(ownerMessage);
-    }
 
     res.json({
       success: true,
