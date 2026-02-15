@@ -425,11 +425,12 @@ function PlaceOrders() {
                           fontSize: '14px',
                           fontWeight: '500',
                           marginBottom: '4px',
+                          color: '#fff',
                         }}
                       >
                         {item.name}
                       </p>
-                      <p style={{ fontSize: '12px', color: '#666' }}>
+                      <p style={{ fontSize: '12px', color: '#a7a7a7' }}>
                         Size: {item.size} | Qty: {item.quantity}
                       </p>
                     </div>
