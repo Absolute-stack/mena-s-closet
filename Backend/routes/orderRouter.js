@@ -5,21 +5,21 @@ import {
   allOrders,
   userOrders,
   updateStatus,
-  testSMS, // ADD THIS
 } from '../controllers/orderController.js';
 import adminAuth from '../middleware/adminAuth.js';
-import authUser from '../middleware/auth.js';
+import userAuth from '../middleware/userAuth.js';
 
 const orderRouter = express.Router();
 
-// Existing routes
-orderRouter.post('/place', authUser, placeOrder);
-orderRouter.post('/verify', authUser, verifyPayment);
-orderRouter.get('/userorders', authUser, userOrders);
+// Admin routes
 orderRouter.get('/list', adminAuth, allOrders);
 orderRouter.post('/status', adminAuth, updateStatus);
 
-// 🧪 Test SMS route (ADD THIS)
-orderRouter.get('/test-sms', testSMS);
+// Order routes - place order doesn't require auth (guest checkout)
+orderRouter.post('/place', placeOrder);
+orderRouter.post('/verify', verifyPayment);
+
+// User routes - require authentication
+orderRouter.post('/userorders', userAuth, userOrders);
 
 export default orderRouter;

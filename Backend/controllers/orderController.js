@@ -14,7 +14,7 @@ async function sendOrderSMS(order, customerName) {
 
     const orderId = order._id.toString().slice(-6).toUpperCase();
     const message = `New Order Alert! 🛒
-Order #${orderId}
+ Order #${orderId}
 Customer: ${customerName || 'Guest'}
 Amount: GH₵${order.totalAmount.toFixed(2)}
 Items: ${order.items.length}
