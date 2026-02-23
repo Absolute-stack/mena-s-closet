@@ -14,6 +14,7 @@ function Product() {
   const [s, setS] = useState('');
   const [image, setImage] = useState(''); // Initialize as empty string
   const [relatedProducts, setRelatedProducts] = useState([]);
+  const isDesktop = !/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   function handleClick(target) {
     target((prevValue) => !prevValue);
@@ -60,16 +61,18 @@ function Product() {
   }, [product]);
 
   useEffect(() => {
-    const hasRefreshed = sessionStorage.getItem('product_refreshed');
+    if (isDesktop) {
+      const hasRefreshed = sessionStorage.getItem('product_refreshed');
 
-    if (!hasRefreshed) {
-      sessionStorage.setItem('product_refreshed', 'true');
-      window.location.reload();
+      if (!hasRefreshed) {
+        sessionStorage.setItem('product_refreshed', 'true');
+        window.location.reload();
+      }
+
+      return () => {
+        sessionStorage.removeItem('product_refreshed');
+      };
     }
-
-    return () => {
-      sessionStorage.removeItem('product_refreshed');
-    };
   }, []);
 
   const isAccessory =
