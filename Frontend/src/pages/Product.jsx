@@ -12,9 +12,8 @@ function Product() {
   const [fabric, setFabric] = useState(false);
   const [delivery, setDelivery] = useState(false);
   const [s, setS] = useState('');
-  const [image, setImage] = useState(''); // Initialize as empty string
+  const [image, setImage] = useState('');
   const [relatedProducts, setRelatedProducts] = useState([]);
-  const isDesktop = !/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   function handleClick(target) {
     target((prevValue) => !prevValue);
@@ -23,11 +22,11 @@ function Product() {
   const product = products?.find((p) => String(p.id) === String(id));
 
   if (!products || products.length === 0) {
-    return <div>Loading product...</div>;
+    return <div className="loading-state">Loading product...</div>;
   }
 
   if (!product) {
-    return <div>Product not found</div>;
+    return <div className="loading-state">Product not found</div>;
   }
 
   function handleImages(src) {
@@ -54,26 +53,14 @@ function Product() {
 
   useEffect(() => {
     if (!product) return;
-
     window.scrollTo(0, 0);
     setImage(product.images[0]);
     setS('');
   }, [product]);
 
-  useEffect(() => {
-    if (isDesktop) {
-      const hasRefreshed = sessionStorage.getItem('product_refreshed');
-
-      if (!hasRefreshed) {
-        sessionStorage.setItem('product_refreshed', 'true');
-        window.location.reload();
-      }
-
-      return () => {
-        sessionStorage.removeItem('product_refreshed');
-      };
-    }
-  }, []);
+  // ❌ REMOVED: The sessionStorage reload useEffect was causing GET request failures
+  // on desktop. It triggered a full page reload which interrupted in-flight network
+  // requests and created race conditions with ShopContext data loading.
 
   const isAccessory =
     product.accessories === true ? 'Accessories' : `${product.gender}`;
@@ -82,8 +69,8 @@ function Product() {
     <main className="product-wrapper">
       <div className="container">
         <PageNav page={isAccessory} />
-        <div className="product-container flex gap2">
-          <div className="wrapper">
+        <div className="product-container">
+          <div className="product-gallery">
             <div className="product-img-wrapper">
               <img
                 className="product-hero-img"
@@ -93,78 +80,69 @@ function Product() {
                 decoding="async"
               />
             </div>
-            <div className="product-strip flex gap2">
-              <img
-                onClick={() => handleImages(product.images?.[0])}
-                src={product.images?.[0]}
-                alt={product.alt}
-                loading="lazy"
-                decoding="async"
-              />
-              <img
-                onClick={() => handleImages(product.images?.[1])}
-                src={product.images?.[1]}
-                alt={product.alt}
-                loading="lazy"
-                decoding="async"
-              />
-              <img
-                onClick={() => handleImages(product.images?.[2])}
-                src={product.images?.[2]}
-                alt={product.alt}
-                loading="lazy"
-                decoding="async"
-              />
-              <img
-                onClick={() => handleImages(product.images?.[3])}
-                src={product.images?.[3]}
-                alt={product.alt}
-                loading="lazy"
-                decoding="async"
-              />
+            <div className="product-strip">
+              {product.images.map((src, index) => (
+                <img
+                  key={index}
+                  onClick={() => handleImages(src)}
+                  src={src}
+                  alt={`${product.alt} view ${index + 1}`}
+                  loading="lazy"
+                  decoding="async"
+                  className={image === src ? 'active-thumb' : ''}
+                />
+              ))}
             </div>
           </div>
+
           <div className="product-information-wrapper">
             <h2>{product.name}</h2>
-            <p>
+            <p className="product-price">
               {currency}
               {product.price}
             </p>
-            <span>🔥 Hurry only {product.stock} left in stock</span>
+            <span className="stock-badge">
+              🔥 Hurry only {product.stock} left in stock
+            </span>
             <div className="product-description">{product.description}</div>
+
             <div className="product-sizes-container">
-              {product.sizes.map((size, index) => {
-                return (
-                  <button
-                    key={index}
-                    type="button"
-                    className={`product-size-btn ${s === size ? 'active' : ''}`}
-                    onClick={handleSize}
-                  >
-                    {size}
-                  </button>
-                );
-              })}
+              {product.sizes.map((size, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  className={`product-size-btn ${s === size ? 'active' : ''}`}
+                  onClick={handleSize}
+                >
+                  {size}
+                </button>
+              ))}
             </div>
+
+            {s === '' && (
+              <p className="size-hint">Please select a size to continue</p>
+            )}
+
             <button
               type="button"
               onClick={() => addToCart(s, product.id)}
               className="add-to-cart-btn"
-              disabled={s === '' ? true : false}
+              disabled={s === ''}
             >
               Add to Cart
             </button>
             <button
               type="button"
               className="buy-btn"
-              disabled={s === '' ? true : false}
+              disabled={s === ''}
               onClick={() => buyNow(product.id, s)}
             >
               Buy Now
             </button>
+
             <div className="payment-container">
-              <div className="payment-container-top flex gap1">
-                <div className="payment-item flex gap1">
+              <div className="payment-container-top">
+                <div className="payment-item">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -181,10 +159,10 @@ function Product() {
                   </svg>
                   <div className="payment-item-info">
                     <p>Authentic</p>
-                    <p>100% Guaranted</p>
+                    <p>100% Guaranteed</p>
                   </div>
                 </div>
-                <div className="payment-item flex gap1">
+                <div className="payment-item">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 512 512"
@@ -212,8 +190,8 @@ function Product() {
                 <div className="top">
                   <p>We Accept</p>
                 </div>
-                <div className="main flex gap1">
-                  <div className="payment-item-bottom item">
+                <div className="main">
+                  <div className="payment-method-item">
                     <svg
                       data-name="Layer 1"
                       xmlns="http://www.w3.org/2000/svg"
@@ -232,7 +210,7 @@ function Product() {
                     </svg>
                     <p>MTN MoMo</p>
                   </div>
-                  <div className="payment-item-bottom item">
+                  <div className="payment-method-item">
                     <svg
                       data-name="Layer 1"
                       xmlns="http://www.w3.org/2000/svg"
@@ -251,7 +229,7 @@ function Product() {
                     </svg>
                     <p>Vodafone Cash</p>
                   </div>
-                  <div className="payment-item-bottom item">
+                  <div className="payment-method-item">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 64 64"
@@ -272,69 +250,63 @@ function Product() {
                 </div>
               </div>
             </div>
-            <div className="fabric-care">
+
+            <div className="accordion-section">
               <div
-                className="info-header flex-sb"
+                className="info-header"
                 onClick={() => handleClick(setFabric)}
               >
-                <p>Fabric & Care</p>
-                <span className={fabric === true ? 'active' : ''}>&#8964;</span>
+                <p>Fabric &amp; Care</p>
+                <span className={fabric ? 'active' : ''}>&#8964;</span>
               </div>
-              <div className={`info ${fabric == true ? 'active' : ''}`}>
-                Mena’s Closet is built on a deep appreciation for fashion and
+              <div className={`info ${fabric ? 'active' : ''}`}>
+                Mena's Closet is built on a deep appreciation for fashion and
                 thoughtful care. Every piece is selected with attention to
                 quality, comfort, and timeless style, ensuring that customers
-                don’t just look good but feel confident in what they wear. We
+                don't just look good but feel confident in what they wear. We
                 believe fashion should be expressive yet responsible, which is
                 why we focus on durable materials, careful craftsmanship, and
-                designs that last beyond trends. At Mena’s Closet, caring for
-                fashion also means caring for our customers—offering pieces that
-                fit well, wear beautifully, and remain part of your wardrobe for
-                years to come.
+                designs that last beyond trends.
               </div>
             </div>
-            <div className="delivery">
+
+            <div className="accordion-section">
               <div
-                className="info-header flex-sb"
+                className="info-header"
                 onClick={() => handleClick(setDelivery)}
               >
-                <p className>Delivery In Ghana</p>
-                <span className={delivery === true ? 'active' : ''}>
-                  &#8964;
-                </span>
+                <p>Delivery In Ghana</p>
+                <span className={delivery ? 'active' : ''}>&#8964;</span>
               </div>
-              <p className={`info ${delivery === true ? 'active' : ''}`}>
-                Mena’s Closet is built on a deep appreciation for fashion and
+              <div className={`info ${delivery ? 'active' : ''}`}>
+                Mena's Closet is built on a deep appreciation for fashion and
                 thoughtful care. Every piece is selected with attention to
                 quality, comfort, and timeless style, ensuring that customers
-                don’t just look good but feel confident in what they wear. We
+                don't just look good but feel confident in what they wear. We
                 believe fashion should be expressive yet responsible, which is
                 why we focus on durable materials, careful craftsmanship, and
-                designs that last beyond trends. At Mena’s Closet, caring for
-                fashion also means caring for our customers—offering pieces that
-                fit well, wear beautifully, and remain part of your wardrobe for
-                years to come.
-              </p>
+                designs that last beyond trends.
+              </div>
             </div>
           </div>
         </div>
+
         <h2 className="related-products-title">You May Also Like</h2>
         <div className="related-products">
-          {relatedProducts.map((product, index) => {
-            return (
-              <Productitem
-                key={index}
-                id={product.id}
-                name={product.name}
-                images={product.images}
-                price={product.price}
-                alt={product.alt}
-              />
-            );
-          })}
+          {relatedProducts.map((product, index) => (
+            <Productitem
+              key={index}
+              id={product.id}
+              name={product.name}
+              images={product.images}
+              price={product.price}
+              alt={product.alt}
+            />
+          ))}
         </div>
       </div>
     </main>
   );
 }
+
 export default Product;

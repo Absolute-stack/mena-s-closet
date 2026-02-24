@@ -275,20 +275,25 @@ async function verifyPayment(req, res) {
 // Get all orders (Admin)
 async function allOrders(req, res) {
   try {
+    console.log('📋 Fetching all orders...');
+
     const orders = await orderModel
       .find({})
       .populate('userId', 'name email')
       .sort({ date: -1 });
 
+    console.log(`✅ Found ${orders.length} orders`);
+
     res.json({
       success: true,
-      orders,
+      orders: orders || [],
     });
   } catch (error) {
-    console.error('All orders error:', error);
+    console.error('❌ All orders error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch orders',
+      error: error.message,
     });
   }
 }
@@ -371,4 +376,55 @@ async function updateStatus(req, res) {
   }
 }
 
-export { placeOrder, verifyPayment, allOrders, userOrders, updateStatus };
+// Delete order (Admin)
+async function deleteOrder(req, res) {
+  try {
+    const { orderId } = req.body;
+
+    if (!orderId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Order ID is required',
+      });
+    }
+
+    const order = await orderModel.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found',
+      });
+    }
+
+    // Restore product stock when order is deleted
+    for (const item of order.items) {
+      await productModel.findByIdAndUpdate(item.productId, {
+        $inc: { stock: item.quantity },
+      });
+    }
+
+    // Delete the order
+    await orderModel.findByIdAndDelete(orderId);
+
+    res.json({
+      success: true,
+      message: 'Order deleted successfully and stock restored',
+    });
+  } catch (error) {
+    console.error('Delete order error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete order',
+    });
+  }
+}
+
+export {
+  placeOrder,
+  verifyPayment,
+  allOrders,
+  userOrders,
+  updateStatus,
+  deleteOrder,
+};

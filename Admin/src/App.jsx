@@ -35,7 +35,7 @@ export default function AdminDashboard() {
   // Search & Pagination State
   const [searchQueryProducts, setSearchQueryProducts] = useState('');
   const [currentPageProducts, setCurrentPageProducts] = useState(1);
-  const itemsPerPageProducts = 5;
+  const itemsPerPageProducts = 20;
 
   const [searchQueryOrders, setSearchQueryOrders] = useState('');
   const [currentPageOrders, setCurrentPageOrders] = useState(1);
@@ -47,6 +47,16 @@ export default function AdminDashboard() {
       fetchOrders();
     }
   }, [token]);
+
+  // Auto-refresh orders every 5 seconds to ensure fresh data
+  useEffect(() => {
+    if (token && activeTab === 'orders') {
+      const interval = setInterval(() => {
+        fetchOrders();
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [token, activeTab]);
 
   // ----------- Login / Logout ----------
   const handleLogin = async () => {
@@ -82,7 +92,15 @@ export default function AdminDashboard() {
     try {
       const response = await fetch(`${API_URL}/product/list`);
       const data = await response.json();
-      if (data.success) setProducts(data.products);
+      if (data.success) {
+        // Sort by date descending (latest first)
+        const sortedProducts = [...data.products].sort((a, b) => {
+          const dateA = new Date(a.createdAt || 0);
+          const dateB = new Date(b.createdAt || 0);
+          return dateB - dateA;
+        });
+        setProducts(sortedProducts);
+      }
     } catch (error) {
       alert('Failed to fetch products');
     }
@@ -93,10 +111,27 @@ export default function AdminDashboard() {
       const response = await fetch(`${API_URL}/order/list`, {
         credentials: 'include',
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
-      if (data.success) setOrders(data.orders);
+
+      if (data.success && data.orders) {
+        setOrders(data.orders);
+        console.log(
+          '✅ Orders fetched successfully:',
+          data.orders.length,
+          'orders',
+        );
+      } else {
+        console.warn('⚠️ Order fetch returned success: false');
+        alert('Failed to fetch orders: ' + (data.message || 'Unknown error'));
+      }
     } catch (error) {
-      alert('Failed to fetch orders');
+      console.error('❌ Failed to fetch orders:', error);
+      alert('Failed to fetch orders: ' + error.message);
     }
   };
 
@@ -215,6 +250,32 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       alert('Failed to update');
+    }
+  };
+
+  const handleDeleteOrder = async (orderId) => {
+    if (
+      !confirm(
+        'Are you sure you want to delete this order? This action cannot be undone.',
+      )
+    )
+      return;
+    try {
+      const response = await fetch(`${API_URL}/order/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ orderId }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert('Order deleted successfully');
+        fetchOrders();
+      } else {
+        alert(data.message || 'Failed to delete order');
+      }
+    } catch (error) {
+      alert('Failed to delete order');
     }
   };
 
@@ -649,7 +710,12 @@ export default function AdminDashboard() {
         {/* ------------------ ORDERS ------------------ */}
         {activeTab === 'orders' && (
           <div className="content-card">
-            <h2 className="card-title">Orders ({orders.length})</h2>
+            <div className="orders-header">
+              <h2 className="card-title">Orders ({orders.length})</h2>
+              <button onClick={fetchOrders} className="refresh-button">
+                🔄 Refresh
+              </button>
+            </div>
 
             {/* Search Orders */}
             <input
@@ -824,6 +890,12 @@ export default function AdminDashboard() {
                       className="toggle-details-btn"
                     >
                       {expandedOrder === order._id ? 'Show Less' : 'Show More'}
+                    </button>
+                    <button
+                      onClick={() => handleDeleteOrder(order._id)}
+                      className="delete-order-btn"
+                    >
+                      Delete
                     </button>
                   </div>
                 </div>

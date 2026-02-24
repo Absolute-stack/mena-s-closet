@@ -132,7 +132,10 @@ async function addProduct(req, res) {
 // List all products
 async function listProducts(req, res) {
   try {
-    const products = await productModel.find({}).lean({ virtuals: true });
+    const products = await productModel
+      .find({})
+      .sort({ createdAt: -1 })
+      .lean({ virtuals: true });
     res.json({
       success: true,
       products,

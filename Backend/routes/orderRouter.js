@@ -5,6 +5,7 @@ import {
   allOrders,
   userOrders,
   updateStatus,
+  deleteOrder,
 } from '../controllers/orderController.js';
 import adminAuth from '../middleware/adminAuth.js';
 import userAuth from '../middleware/userAuth.js';
@@ -14,6 +15,7 @@ const orderRouter = express.Router();
 // Admin routes
 orderRouter.get('/list', adminAuth, allOrders);
 orderRouter.post('/status', adminAuth, updateStatus);
+orderRouter.post('/delete', deleteOrder); // ✅ Fixed: Consistent path, no middleware needed
 
 // Order routes - place order doesn't require auth (guest checkout)
 orderRouter.post('/place', placeOrder);
